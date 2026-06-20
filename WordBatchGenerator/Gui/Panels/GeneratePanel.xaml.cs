@@ -393,7 +393,7 @@ public partial class GeneratePanel : Page
 
             var outputDir = TxtOutputDir.Text;
             var fileNameTemplate = TxtFileNameTemplate.Text;
-            var subfolderVar = ChkSubfolder.IsChecked == true ? (CmbSubfolderVar.SelectedItem as string ?? "") : "";
+            var subfolderVar = ChkSubfolder.IsChecked == true ? (TxtSubfolderRule.Text ?? string.Empty) : "";
 
             await Task.Run(() =>
             {
@@ -998,7 +998,7 @@ public partial class GeneratePanel : Page
 
     // ================= 文件合并与 PDF 转换逻辑 =================
 
-    private void BtnMergeWord_Click(object sender, RoutedEventArgs e)
+    private async void BtnMergeWord_Click(object sender, RoutedEventArgs e)
     {
         if (_generatedFullPaths == null || _generatedFullPaths.Count == 0)
         {
@@ -1016,10 +1016,17 @@ public partial class GeneratePanel : Page
         var fileName = $"合并文档_{_currentScheme?.Name ?? "未命名"}.docx";
         var destPath = Path.Combine(outputDir, fileName);
 
+        // 显示进度动画与提示
+        PanelProgress.Visibility = Visibility.Visible;
+        ProgressBar.IsIndeterminate = true;
+        TxtProgress.Text = "正在合并 Word 文档，请稍候...";
+        BtnMergeWord.IsEnabled = false;
+        BtnMergePdf.IsEnabled = false;
+
         try
         {
             this.Cursor = System.Windows.Input.Cursors.Wait;
-            Generator.MergeWordFiles(_generatedFullPaths, destPath);
+            await Task.Run(() => Generator.MergeWordFiles(_generatedFullPaths, destPath));
             this.Cursor = System.Windows.Input.Cursors.Arrow;
 
             MessageBox.Show("合并成功！已将合并后的文档列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -1047,9 +1054,17 @@ public partial class GeneratePanel : Page
             this.Cursor = System.Windows.Input.Cursors.Arrow;
             MessageBox.Show($"合并 Word 文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        finally
+        {
+            // 恢复进度面板与按钮状态
+            ProgressBar.IsIndeterminate = false;
+            PanelProgress.Visibility = Visibility.Collapsed;
+            BtnMergeWord.IsEnabled = true;
+            BtnMergePdf.IsEnabled = true;
+        }
     }
 
-    private void BtnMergePdf_Click(object sender, RoutedEventArgs e)
+    private async void BtnMergePdf_Click(object sender, RoutedEventArgs e)
     {
         if (_generatedFullPaths == null || _generatedFullPaths.Count == 0)
         {
@@ -1076,15 +1091,26 @@ public partial class GeneratePanel : Page
         var destPath = Path.Combine(outputDir, fileName);
         var tempDocx = Path.Combine(outputDir, $"~temp_merge_{Guid.NewGuid():N}.docx");
 
+        // 显示进度动画与提示
+        PanelProgress.Visibility = Visibility.Visible;
+        ProgressBar.IsIndeterminate = true;
+        TxtProgress.Text = "正在合并并转换为 PDF 文档，转换过程可能耗时较长，请稍候...";
+        BtnMergeWord.IsEnabled = false;
+        BtnMergePdf.IsEnabled = false;
+
+        bool convertSuccess = false;
         try
         {
             this.Cursor = System.Windows.Input.Cursors.Wait;
 
-            // 1. 合并为临时 Word 文档
-            Generator.MergeWordFiles(_generatedFullPaths, tempDocx);
+            await Task.Run(() =>
+            {
+                // 1. 合并为临时 Word 文档
+                Generator.MergeWordFiles(_generatedFullPaths, tempDocx);
 
-            // 2. 转换为 PDF
-            bool convertSuccess = Generator.ConvertDocxToPdfDynamic(tempDocx, destPath);
+                // 2. 转换为 PDF
+                convertSuccess = Generator.ConvertDocxToPdfDynamic(tempDocx, destPath);
+            });
 
             this.Cursor = System.Windows.Input.Cursors.Arrow;
 
@@ -1131,6 +1157,12 @@ public partial class GeneratePanel : Page
                 }
                 catch { }
             }
+
+            // 恢复进度面板与按钮状态
+            ProgressBar.IsIndeterminate = false;
+            PanelProgress.Visibility = Visibility.Collapsed;
+            BtnMergeWord.IsEnabled = true;
+            BtnMergePdf.IsEnabled = true;
         }
     }
 
