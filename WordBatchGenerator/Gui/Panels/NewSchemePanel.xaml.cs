@@ -176,7 +176,7 @@ public partial class NewSchemePanel : Page
                     if (selection.type == "error_cross_paragraph")
                     {
                         _lastSelection = null;
-                        TxtSelectionText.Text = "⚠️ 选区不能跨越多个段落。\n您选择的文本在 Word 底层分属不同段落（部分看似连着，但实为不同分段）。为了防止破坏 Word 格式，请仅在单行或单个段落内划选。";
+                        TxtSelectionText.Text = "⚠️ 选区不能跨越多个段落。\n选择的文本在 Word 底层分属不同段落（提示：Word 中如果存在手动换行符 ↵ 等分段符号，表面相连的文字在底层其实属于两个独立段落）。建议您先在 Word 中手动清除这些多余的分段符号并重新保存，或仅在单个段落/单行内进行划选。";
                         TxtSelectionText.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#991B1B"));
                         TxtSelectionText.FontWeight = FontWeights.Medium;
                         

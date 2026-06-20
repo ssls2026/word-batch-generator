@@ -534,9 +534,21 @@ public class WordParser
                     }
 
                     // 字体名称
-                    if (runProps.RunFonts?.Ascii != null)
+                    if (runProps.RunFonts != null)
                     {
-                        runStyles.Add($"font-family: {runProps.RunFonts.Ascii.Value};");
+                        var fonts = new List<string>();
+                        if (runProps.RunFonts.Ascii != null)
+                        {
+                            fonts.Add($"'{runProps.RunFonts.Ascii.Value}'");
+                        }
+                        if (runProps.RunFonts.EastAsia != null)
+                        {
+                            fonts.Add($"'{runProps.RunFonts.EastAsia.Value}'");
+                        }
+                        if (fonts.Count > 0)
+                        {
+                            runStyles.Add($"font-family: {string.Join(", ", fonts)};");
+                        }
                     }
                 }
 
