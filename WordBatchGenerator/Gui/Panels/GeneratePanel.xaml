@@ -8,13 +8,13 @@
       Background="Transparent">
 
     <Page.Resources>
-        <!-- Word 蓝按钮样式 -->
+        <!-- Word 蓝灰色（莫兰迪）按钮样式 -->
         <Style x:Key="WordButton" TargetType="Button">
             <Setter Property="FontFamily" Value="Microsoft YaHei"/>
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#2B579A"/>
+            <Setter Property="Background" Value="#738896"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="16,8"/>
@@ -28,7 +28,7 @@
                                     <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#000000"/>
                                 </Border.Effect>
                             </Border>
-                            <Border x:Name="hover" Background="#1F3F70" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <Border x:Name="hover" Background="#5E707C" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -36,7 +36,7 @@
                                 <Setter TargetName="hover" Property="Opacity" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#173056"/>
+                                <Setter TargetName="border" Property="Background" Value="#4C5A64"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.5"/>
@@ -47,13 +47,13 @@
             </Setter>
         </Style>
 
-        <!-- PDF 红按钮样式 -->
+        <!-- PDF 红灰色（莫兰迪）按钮样式 -->
         <Style x:Key="PdfButton" TargetType="Button">
             <Setter Property="FontFamily" Value="Microsoft YaHei"/>
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#C43E2C"/>
+            <Setter Property="Background" Value="#9C8381"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="16,8"/>
@@ -67,7 +67,7 @@
                                     <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#000000"/>
                                 </Border.Effect>
                             </Border>
-                            <Border x:Name="hover" Background="#9E3021" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <Border x:Name="hover" Background="#826C6A" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -75,7 +75,7 @@
                                 <Setter TargetName="hover" Property="Opacity" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#7E2418"/>
+                                <Setter TargetName="border" Property="Background" Value="#6A5756"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.5"/>
