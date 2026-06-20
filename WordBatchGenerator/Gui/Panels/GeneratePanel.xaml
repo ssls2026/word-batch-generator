@@ -109,7 +109,8 @@
                                              BorderBrush="#E7E1D7"
                                              BorderThickness="1.5"
                                              VerticalContentAlignment="Center"
-                                             Margin="0,0,12,0"/>
+                                             Margin="0,0,12,0"
+                                             Tag="请选择或拖入 Excel 数据源文件路径..."/>
 
                                     <Button Grid.Column="1"
                                             x:Name="BtnBrowseExcel"
@@ -310,7 +311,8 @@
                                  BorderBrush="#E7E1D7"
                                  BorderThickness="1.5"
                                  VerticalContentAlignment="Center"
-                                 Margin="0,0,12,0"/>
+                                 Margin="0,0,12,0"
+                                 Tag="请选择生成的 Word 文档输出保存目录..."/>
 
                         <Button Grid.Column="1"
                                 x:Name="BtnBrowseOutputDir"

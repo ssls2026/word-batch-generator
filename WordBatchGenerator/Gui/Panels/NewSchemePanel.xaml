@@ -105,7 +105,8 @@
                              TextWrapping="NoWrap"
                              AcceptsReturn="False"
                              Padding="8,0"
-                             VerticalAlignment="Center"/>
+                             VerticalAlignment="Center"
+                             Tag="请输入方案名称，例如：合同方案..."/>
 
                     <!-- Word 模板文件 Label & TextBox + Button -->
                     <TextBlock Grid.Column="3"
@@ -130,7 +131,8 @@
                                  BorderThickness="1.5"
                                  VerticalContentAlignment="Center"
                                  Padding="8,0"
-                                 Margin="0,0,8,0"/>
+                                 Margin="0,0,8,0"
+                                 Tag="请选择或拖入 Word 模板文件路径 (.docx)..."/>
                         <Button Grid.Column="1"
                                 x:Name="BtnBrowseTemplate"
                                 Content="导入模板"
