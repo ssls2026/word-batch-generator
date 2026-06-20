@@ -357,6 +357,14 @@ public partial class GeneratePanel : Page
     }
 
     /// <summary>
+    /// 自动将视图平滑滚动到最底部，确保用户能在低分辨率屏幕下即时看到最新的输出与合并按钮
+    /// </summary>
+    private void ScrollToBottom()
+    {
+        _ = Dispatcher.BeginInvoke(new Action(() => MainScrollViewer.ScrollToBottom()), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+    }
+
+    /// <summary>
     /// 开始批量生成 Word 文档
     /// </summary>
     private async void BtnGenerate_Click(object sender, RoutedEventArgs e)
@@ -404,6 +412,7 @@ public partial class GeneratePanel : Page
         MergedResultsItemsControl.ItemsSource = null;
         MergedResultsItemsControl.Visibility = Visibility.Collapsed;
         BtnGenerate.IsEnabled = false;
+        ScrollToBottom();
 
         try
         {
@@ -435,9 +444,6 @@ public partial class GeneratePanel : Page
                     }
                 );
             });
-
-            MessageBox.Show($"批量生成完成！共生成 {_excelData.Count} 个文件", "成功",
-                MessageBoxButton.OK, MessageBoxImage.Information);
 
             // 渲染生成结果
             var generatedFiles = new List<string>();
@@ -478,6 +484,16 @@ public partial class GeneratePanel : Page
 
             ResultItemsControl.ItemsSource = generatedFiles;
             PanelResults.Visibility = Visibility.Visible;
+
+            // 提前收起进度 UI 并滚动，使生成的卡片与合并按钮能够立即呈现在屏幕上
+            PanelProgress.Visibility = Visibility.Collapsed;
+            BtnGenerate.IsEnabled = true;
+            ProgressBar.Value = 0;
+
+            ScrollToBottom();
+
+            MessageBox.Show($"批量生成完成！共生成 {_excelData.Count} 个文件", "成功",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
@@ -1053,14 +1069,13 @@ public partial class GeneratePanel : Page
         TxtMergeProgress.Text = "正在合并 Word 文档，请稍候...";
         BtnMergeWord.IsEnabled = false;
         BtnMergePdf.IsEnabled = false;
+        ScrollToBottom();
 
         try
         {
             this.Cursor = System.Windows.Input.Cursors.Wait;
             await Task.Run(() => Generator.MergeWordFiles(_generatedFullPaths, destPath));
             this.Cursor = System.Windows.Input.Cursors.Arrow;
-
-            MessageBox.Show("合并成功！已将合并后的文档列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
 
             // 检查列表中是否已经有这个路径，避免重复添加
             var existing = _mergedFiles.FirstOrDefault(f => string.Equals(f.FullPath, destPath, StringComparison.OrdinalIgnoreCase));
@@ -1079,6 +1094,15 @@ public partial class GeneratePanel : Page
             MergedResultsItemsControl.ItemsSource = null;
             MergedResultsItemsControl.ItemsSource = _mergedFiles;
             MergedResultsItemsControl.Visibility = Visibility.Visible;
+
+            // 恢复合并进度面板与按钮状态
+            PanelMergeProgress.Visibility = Visibility.Collapsed;
+            BtnMergeWord.IsEnabled = true;
+            BtnMergePdf.IsEnabled = true;
+
+            ScrollToBottom();
+
+            MessageBox.Show("合并成功！已将合并后的文档列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
@@ -1126,6 +1150,7 @@ public partial class GeneratePanel : Page
         TxtMergeProgress.Text = "正在合并并转换为 PDF 文档，转换过程可能耗时较长，请稍候...";
         BtnMergeWord.IsEnabled = false;
         BtnMergePdf.IsEnabled = false;
+        ScrollToBottom();
 
         bool convertSuccess = false;
         try
@@ -1145,8 +1170,6 @@ public partial class GeneratePanel : Page
 
             if (convertSuccess)
             {
-                MessageBox.Show("合并并转换为 PDF 成功！已将合并后的 PDF 文件列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
-
                 // 检查列表中是否已经有这个路径，避免重复添加
                 var existing = _mergedFiles.FirstOrDefault(f => string.Equals(f.FullPath, destPath, StringComparison.OrdinalIgnoreCase));
                 if (existing != null)
@@ -1164,6 +1187,15 @@ public partial class GeneratePanel : Page
                 MergedResultsItemsControl.ItemsSource = null;
                 MergedResultsItemsControl.ItemsSource = _mergedFiles;
                 MergedResultsItemsControl.Visibility = Visibility.Visible;
+
+                // 恢复合并进度面板与按钮状态
+                PanelMergeProgress.Visibility = Visibility.Collapsed;
+                BtnMergeWord.IsEnabled = true;
+                BtnMergePdf.IsEnabled = true;
+
+                ScrollToBottom();
+
+                MessageBox.Show("合并并转换为 PDF 成功！已将合并后的 PDF 文件列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {

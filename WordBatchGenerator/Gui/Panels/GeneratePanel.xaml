@@ -223,7 +223,7 @@
         </Grid>
 
         <!-- Scrollable Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12">
+        <ScrollViewer x:Name="MainScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12">
             <StackPanel Margin="0,0,12,0">
                 <!-- ===== 数据输入源双页签 ===== -->
                 <Border Background="White"
@@ -261,6 +261,7 @@
                                                  Background="#F7F4EF"
                                                  BorderBrush="#E7E1D7"
                                                  BorderThickness="1.5"
+                                                 Padding="12,0"
                                                  VerticalContentAlignment="Center"
                                                  Margin="0,0,12,0"
                                                  Tag="请选择或拖入 Excel 数据源文件路径..."/>
@@ -440,6 +441,7 @@
                                          Background="#F7F4EF"
                                          BorderBrush="#E7E1D7"
                                          BorderThickness="1.5"
+                                         Padding="12,0"
                                          VerticalContentAlignment="Center"
                                          Tag="请选择生成的 Word 文档输出保存目录..."/>
                                 <Button Grid.Column="2"
@@ -476,6 +478,7 @@
                                              Height="38"
                                              FontSize="13.5"
                                              IsReadOnly="False"
+                                             Padding="12,0"
                                              VerticalContentAlignment="Center"
                                              TextChanged="TxtSubfolderRule_TextChanged"
                                              Tag="请输入或从右侧插入分类变量建立子目录，例如：{{客户}}"/>
@@ -523,6 +526,7 @@
                                          Background="White"
                                          BorderBrush="#E7E1D7"
                                          BorderThickness="1.5"
+                                         Padding="12,0"
                                          VerticalContentAlignment="Center"
                                          TextChanged="TxtFileNameTemplate_TextChanged"
                                          Text="文档-{{序号}}.docx"/>
