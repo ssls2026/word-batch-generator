@@ -158,7 +158,8 @@
 
             <!-- 左侧：Word 预览区 -->
             <Grid Grid.Column="0" Margin="0,0,20,0">
-                <Border Background="White"
+                <Border x:Name="WordPreviewBorder"
+                        Background="White"
                         BorderBrush="#E7E1D7"
                         BorderThickness="1"
                         CornerRadius="12"
@@ -170,6 +171,44 @@
                                           Color="#000000"/>
                     </Border.Effect>
                     <wv2:WebView2 x:Name="WordPreview"/>
+                </Border>
+
+                <!-- Fallback UI when WebView2 is missing -->
+                <Border x:Name="PanelWebViewError"
+                        Background="#F7F4EF"
+                        BorderBrush="#E7E1D7"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20"
+                        Visibility="Collapsed">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12"
+                                          ShadowDepth="3"
+                                          Opacity="0.06"
+                                          Color="#000000"/>
+                    </Border.Effect>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="480">
+                        <TextBlock Text="💡" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <TextBlock Text="未检测到 WebView2 运行环境"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="#C4612F"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,12"/>
+                        <TextBlock Text="此功能需要 Microsoft Edge WebView2 运行环境来预览 Word 文档并标注变量。当前系统缺失该组件（常见于精简版 Windows 系统或长期关闭更新的 Win10 系统）。"
+                                   FontSize="13.5"
+                                   Foreground="#5C635D"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Center"
+                                   LineHeight="1.6"
+                                   Margin="0,0,0,24"/>
+                        <Button Content="📥 前往下载 WebView2 运行时"
+                                Height="38"
+                                Width="260"
+                                Padding="0"
+                                Style="{StaticResource PrimaryButton}"
+                                Click="BtnDownloadWebView2_Click"/>
+                    </StackPanel>
                 </Border>
             </Grid>
 
@@ -246,6 +285,7 @@
                             <Button Grid.Column="1"
                                     x:Name="BtnAddVariable"
                                     Content="标注"
+                                    IsEnabled="False"
                                     Width="60"
                                     Height="34"
                                     FontSize="13"

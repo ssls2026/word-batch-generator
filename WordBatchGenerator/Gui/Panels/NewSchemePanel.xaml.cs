@@ -23,6 +23,7 @@ public partial class NewSchemePanel : Page
 
     private class WebViewSelectionMessage
     {
+        public string type { get; set; } = "success";
         public string text { get; set; } = string.Empty;
         public int startPIndex { get; set; }
         public int endPIndex { get; set; }
@@ -58,7 +59,19 @@ public partial class NewSchemePanel : Page
     {
         try
         {
-            await WordPreview.EnsureCoreWebView2Async(null);
+            var cacheDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "WordBatchGenerator",
+                "WebView2_Cache"
+            );
+            if (!Directory.Exists(cacheDir))
+            {
+                Directory.CreateDirectory(cacheDir);
+            }
+
+            var env = await Microsoft.Web.WebView2.Core.CoreWebView2Environment.CreateAsync(null, cacheDir);
+            await WordPreview.EnsureCoreWebView2Async(env);
+
             WordPreview.CoreWebView2.Settings.IsScriptEnabled = true;
             WordPreview.NavigationCompleted += WordPreview_NavigationCompleted;
             WordPreview.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
@@ -73,7 +86,27 @@ public partial class NewSchemePanel : Page
         }
         catch (Exception)
         {
-            // WebView2 runtime 未安装时降级到纯文本显示
+            Dispatcher.Invoke(() =>
+            {
+                WordPreviewBorder.Visibility = Visibility.Collapsed;
+                PanelWebViewError.Visibility = Visibility.Visible;
+            });
+        }
+    }
+
+    private void BtnDownloadWebView2_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"无法打开浏览器: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -135,14 +168,35 @@ public partial class NewSchemePanel : Page
         try
         {
             var json = e.WebMessageAsJson;
-            _lastSelection = JsonSerializer.Deserialize<WebViewSelectionMessage>(json);
-            if (_lastSelection != null)
+            var selection = JsonSerializer.Deserialize<WebViewSelectionMessage>(json);
+            if (selection != null)
             {
                 Dispatcher.Invoke(() =>
                 {
-                    TxtSelectionText.Text = $"已选中: \"{_lastSelection.text}\"";
-                    TxtSelectionText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["PrimaryBrush"];
-                    TxtSelectionText.FontWeight = FontWeights.Bold;
+                    if (selection.type == "error_cross_paragraph")
+                    {
+                        _lastSelection = null;
+                        TxtSelectionText.Text = "⚠️ 选区不能跨越多个段落。\n您选择的文本在 Word 底层分属不同段落（部分看似连着，但实为不同分段）。为了防止破坏 Word 格式，请仅在单行或单个段落内划选。";
+                        TxtSelectionText.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#991B1B"));
+                        TxtSelectionText.FontWeight = FontWeights.Medium;
+                        
+                        SelectionCard.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FEF2F2"));
+                        SelectionCard.BorderBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FEE2E2"));
+                        
+                        BtnAddVariable.IsEnabled = false;
+                    }
+                    else
+                    {
+                        _lastSelection = selection;
+                        TxtSelectionText.Text = $"已选中: \"{selection.text}\"";
+                        TxtSelectionText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["PrimaryBrush"];
+                        TxtSelectionText.FontWeight = FontWeights.Bold;
+
+                        SelectionCard.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFBF8"));
+                        SelectionCard.BorderBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F3EBE5"));
+
+                        BtnAddVariable.IsEnabled = true;
+                    }
                 });
             }
         }
@@ -197,10 +251,19 @@ public partial class NewSchemePanel : Page
 
                 if (isNaN(startPIndex) || isNaN(endPIndex)) return;
 
+                if (startPIndex !== endPIndex) {
+                    window.chrome.webview.postMessage({
+                        type: 'error_cross_paragraph',
+                        text: text
+                    });
+                    return;
+                }
+
                 const startOffset = getCharacterOffsetWithin(startP, range.startContainer, range.startOffset);
                 const endOffset = getCharacterOffsetWithin(endP, range.endContainer, range.endOffset);
 
                 window.chrome.webview.postMessage({
+                    type: 'success',
                     text: text,
                     startPIndex: startPIndex,
                     endPIndex: endPIndex,
@@ -316,6 +379,10 @@ public partial class NewSchemePanel : Page
             TxtSelectionText.Text = "请在左侧预览区中划选变量文本";
             TxtSelectionText.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#8A8070"));
             TxtSelectionText.FontWeight = FontWeights.Medium;
+
+            SelectionCard.Background = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFBF8"));
+            SelectionCard.BorderBrush = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#F3EBE5"));
+            BtnAddVariable.IsEnabled = false;
 
             // 重新载入预览
             LoadPreview();
