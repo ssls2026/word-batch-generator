@@ -32,49 +32,123 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Border Name="NavBorder"
-                                Background="{TemplateBinding Background}"
+                                Background="Transparent"
                                 CornerRadius="10"
                                 Padding="14,0"
                                 Height="44">
                             <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="4"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                                <!-- Hover overlay background -->
+                                <Border Name="HoverOverlay"
+                                        Background="#2A3634"
+                                        CornerRadius="10"
+                                        Opacity="0"/>
+                                <!-- Checked overlay background -->
+                                <Border Name="CheckedOverlay"
+                                        Background="#1E2A28"
+                                        CornerRadius="10"
+                                        Opacity="0"/>
 
-                                <!-- 选中指示条 -->
-                                <Border Name="SelectionIndicator"
-                                        Grid.Column="0"
-                                        Width="4"
-                                        Background="Transparent"
-                                        CornerRadius="2"
-                                        VerticalAlignment="Stretch"
-                                        Margin="-14,6,-10,6"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="4"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                <!-- 图标 -->
-                                <TextBlock Name="NavIcon"
-                                           Grid.Column="1"
-                                           FontSize="18"
-                                           Margin="0,0,12,0"
-                                           VerticalAlignment="Center"/>
+                                    <!-- 选中指示条 -->
+                                    <Border Name="SelectionIndicator"
+                                            Grid.Column="0"
+                                            Width="4"
+                                            Background="#C4612F"
+                                            CornerRadius="2"
+                                            VerticalAlignment="Stretch"
+                                            Margin="-14,6,-10,6"
+                                            Opacity="0">
+                                        <Border.RenderTransform>
+                                            <TranslateTransform X="-6"/>
+                                        </Border.RenderTransform>
+                                    </Border>
 
-                                <!-- 文本 -->
-                                <ContentPresenter Grid.Column="2"
-                                                  VerticalAlignment="Center"
-                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                    <!-- 图标 -->
+                                    <TextBlock Name="NavIcon"
+                                               Grid.Column="1"
+                                               FontSize="18"
+                                               Margin="0,0,12,0"
+                                               VerticalAlignment="Center"/>
+
+                                    <!-- 文本 -->
+                                    <ContentPresenter Grid.Column="2"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                                </Grid>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <!-- Hover Trigger -->
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsChecked" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0.8" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </MultiTrigger.EnterActions>
+                                <MultiTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </MultiTrigger.ExitActions>
+                            </MultiTrigger>
+
+                            <!-- Checked Trigger -->
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="NavBorder" Property="Background" Value="#1E2A28"/>
-                                <Setter TargetName="SelectionIndicator" Property="Background" Value="#C4612F"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="CheckedOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="SelectionIndicator"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="SelectionIndicator"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                             To="0" Duration="0:0:0.25">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="CheckedOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="SelectionIndicator"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0" Duration="0:0:0.15"/>
+                                            <DoubleAnimation Storyboard.TargetName="SelectionIndicator"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                             To="-6" Duration="0:0:0.15"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                                 <Setter Property="Foreground" Value="#FFFFFF"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="NavBorder" Property="Background" Value="#2A3634"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
