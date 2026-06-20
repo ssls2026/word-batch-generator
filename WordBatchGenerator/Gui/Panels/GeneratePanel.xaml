@@ -7,6 +7,86 @@
       d:DesignHeight="680" d:DesignWidth="860"
       Background="Transparent">
 
+    <Page.Resources>
+        <!-- Word 蓝按钮样式 -->
+        <Style x:Key="WordButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="Microsoft YaHei"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#2B579A"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#000000"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="hover" Background="#1F3F70" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="hover" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#173056"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- PDF 红按钮样式 -->
+        <Style x:Key="PdfButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="Microsoft YaHei"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#C43E2C"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#000000"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="hover" Background="#9E3021" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="hover" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#7E2418"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
     <Grid Margin="20" Opacity="0">
         <Grid.RenderTransform>
             <TranslateTransform Y="25"/>
@@ -636,18 +716,18 @@
                                 
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                     <Button x:Name="BtnMergeWord"
-                                            Content="合并为单个 Word"
-                                            Width="140"
+                                            Content="📘 合并为单个 Word"
+                                            Width="150"
                                             Height="38"
-                                            Style="{StaticResource SecondaryButton}"
+                                            Style="{StaticResource WordButton}"
                                             Margin="0,0,12,0"
                                             Padding="0"
                                             Click="BtnMergeWord_Click"/>
                                     <Button x:Name="BtnMergePdf"
-                                            Content="合并为单个 PDF"
-                                            Width="140"
+                                            Content="📕 合并为单个 PDF"
+                                            Width="150"
                                             Height="38"
-                                            Style="{StaticResource PrimaryButton}"
+                                            Style="{StaticResource PdfButton}"
                                             Padding="0"
                                             Click="BtnMergePdf_Click"/>
                                 </StackPanel>
