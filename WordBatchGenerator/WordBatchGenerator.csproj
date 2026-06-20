@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Word批量生成器</AssemblyName>
+    <Product>Word 批量生成器</Product>
+    <Version>2.0.0</Version>
+    <Authors>LZS</Authors>
+    <Description>Word 批量变量替换与授权生成工具 - C# 重构版</Description>
+  </PropertyGroup>
+
+  <!-- 发布配置：单文件 + 自包含（WPF 不支持裁剪，已移除） -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Word 处理 -->
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.2" />
+    <!-- Excel 处理 -->
+    <PackageReference Include="EPPlus" Version="7.1.3" />
+    <!-- WebView2 for 预览 -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2535.41" />
+    <!-- 现代化 UI 库（可选） -->
+    <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+  </ItemGroup>
+
+</Project>
