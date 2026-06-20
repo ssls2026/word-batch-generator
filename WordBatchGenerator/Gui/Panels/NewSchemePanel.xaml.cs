@@ -481,16 +481,16 @@ public partial class NewSchemePanel : Page
                     const target = matches[{index} % matches.length];
                     target.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
                     
-                    // Highlight flash
-                    const origBg = target.style.backgroundColor;
-                    const origBorder = target.style.border;
-                    target.style.backgroundColor = '#FFE0B2';
-                    target.style.border = '2px solid #FF9800';
+                    // Add the flash-active class instantly
+                    target.classList.add('flash-active');
                     
+                    // Force a reflow
+                    target.offsetHeight;
+                    
+                    // Remove after 300ms to let CSS transitions smoothly fade out the highlight
                     setTimeout(() => {{
-                        target.style.backgroundColor = origBg;
-                        target.style.border = origBorder;
-                    }}, 1500);
+                        target.classList.remove('flash-active');
+                    }}, 300);
                 }}
             }})();
         ";

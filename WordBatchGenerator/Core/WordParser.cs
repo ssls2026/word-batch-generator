@@ -327,17 +327,30 @@ public class WordParser
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html><head><meta charset='utf-8'>");
         sb.AppendLine("<style>");
-        sb.AppendLine("body { font-family: '微软雅黑', 'Microsoft YaHei', '宋体', SimSun; font-size: 15px; color: #1e293b; padding: 35px; line-height: 1.15; white-space: pre-wrap; word-break: break-all; }");
+        sb.AppendLine("body { font-family: '微软雅黑', 'Microsoft YaHei', '宋体', SimSun; font-size: 15px; color: #1e293b; background-color: #F7F4EF; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; }");
+        sb.AppendLine("::-webkit-scrollbar { width: 6px; height: 6px; }");
+        sb.AppendLine("::-webkit-scrollbar-track { background: transparent; }");
+        sb.AppendLine("::-webkit-scrollbar-thumb { background: #E3DEC5; border-radius: 3px; }");
+        sb.AppendLine("::-webkit-scrollbar-thumb:hover { background: #C4612F; }");
+        sb.AppendLine("::selection { background: rgba(196, 97, 47, 0.18); color: #1F2421; }");
+        sb.AppendLine("#paper-container { background-color: #ffffff; width: 800px; min-height: 1000px; padding: 50px 60px; box-sizing: border-box; border-radius: 12px; border: 1px solid #E7E1D7; box-shadow: 0 6px 24px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02); transform-origin: top center; }");
         sb.AppendLine("p { margin: 0; padding: 0; }");
         sb.AppendLine("table { border-collapse: collapse; width: 100%; margin: 15px 0; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }");
         sb.AppendLine("td { border: 1px solid #cbd5e1; padding: 10px 12px; vertical-align: middle; }");
-        sb.AppendLine(".variable { font-weight: bold; color: #4f46e5; background-color: #f0f3ff; border: 1px solid #c7d2fe; border-radius: 4px; padding: 2px 6px; display: inline-block; }");
+        sb.AppendLine(".variable { font-weight: bold; color: #4E7A8A; background-color: #F0F5F7; border: 1px solid #C5D6DC; border-radius: 4px; padding: 2px 6px; display: inline-block; transition: all 0.3s ease-out; }");
+        sb.AppendLine(".variable:hover { cursor: pointer; transform: scale(1.03); background-color: #E2ECF0; border-color: #A3C0CB; box-shadow: 0 2px 6px rgba(78, 122, 138, 0.15); }");
+        sb.AppendLine(".variable.flash-active { background-color: #FFE0B2 !important; border-color: #FF9800 !important; box-shadow: 0 0 8px rgba(255, 152, 0, 0.4) !important; transition: none !important; }");
         sb.AppendLine("</style>");
         sb.AppendLine("</head><body>");
+        sb.AppendLine("<div id='paper-container'>");
 
         using var doc = WordprocessingDocument.Open(filePath, false);
         var body = doc.MainDocumentPart?.Document.Body;
-        if (body == null) return sb.ToString();
+        if (body == null)
+        {
+            sb.AppendLine("</div></body></html>");
+            return sb.ToString();
+        }
 
         int pIndex = 0;
         foreach (var element in body.Elements())
@@ -351,6 +364,29 @@ public class WordParser
                 sb.AppendLine(RenderTableHtml(table, ref pIndex));
             }
         }
+
+        sb.AppendLine("</div>"); // Close paper-container
+        
+        // Add zoom auto-adjustment script
+        sb.AppendLine("<script>");
+        sb.AppendLine("function adjustZoom() {");
+        sb.AppendLine("    const paper = document.getElementById('paper-container');");
+        sb.AppendLine("    if (!paper) return;");
+        sb.AppendLine("    const containerWidth = window.innerWidth;");
+        sb.AppendLine("    const padding = 40;");
+        sb.AppendLine("    const targetWidth = containerWidth - padding;");
+        sb.AppendLine("    const paperWidth = 800;");
+        sb.AppendLine("    if (targetWidth < paperWidth) {");
+        sb.AppendLine("        const zoomFactor = targetWidth / paperWidth;");
+        sb.AppendLine("        document.body.style.zoom = zoomFactor;");
+        sb.AppendLine("    } else {");
+        sb.AppendLine("        document.body.style.zoom = 1.0;");
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+        sb.AppendLine("window.addEventListener('resize', adjustZoom);");
+        sb.AppendLine("window.addEventListener('load', adjustZoom);");
+        sb.AppendLine("adjustZoom();");
+        sb.AppendLine("</script>");
 
         sb.AppendLine("</body></html>");
         return sb.ToString();
