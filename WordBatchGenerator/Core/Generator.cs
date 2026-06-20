@@ -378,4 +378,191 @@ public class Generator
             p?.WaitForExit(3000);
         }
     }
+
+    /// <summary>
+    /// 设置指定打印机的单双面打印模式
+    /// </summary>
+    public static void SetPrinterDuplex(string printerName, string duplexMode)
+    {
+        try
+        {
+            using (var printServer = new System.Printing.LocalPrintServer())
+            {
+                System.Printing.PrintQueue? queue = null;
+                try
+                {
+                    queue = new System.Printing.PrintQueue(printServer, printerName, System.Printing.PrintSystemDesiredAccess.AdministratePrinter);
+                }
+                catch
+                {
+                    try
+                    {
+                        queue = new System.Printing.PrintQueue(printServer, printerName, System.Printing.PrintSystemDesiredAccess.UsePrinter);
+                    }
+                    catch
+                    {
+                        // 忽略
+                    }
+                }
+
+                if (queue != null)
+                {
+                    using (queue)
+                    {
+                        System.Printing.Duplexing targetDuplex = System.Printing.Duplexing.Unknown;
+                        switch (duplexMode.ToLower())
+                        {
+                            case "onesided":
+                            case "simplex":
+                                targetDuplex = System.Printing.Duplexing.OneSided;
+                                break;
+                            case "duplexlongedge":
+                            case "twosidedlongedge":
+                                targetDuplex = System.Printing.Duplexing.TwoSidedLongEdge;
+                                break;
+                            case "duplexshortedge":
+                            case "twosidedshortedge":
+                                targetDuplex = System.Printing.Duplexing.TwoSidedShortEdge;
+                                break;
+                        }
+
+                        if (targetDuplex != System.Printing.Duplexing.Unknown)
+                        {
+                            if (queue.UserPrintTicket != null)
+                            {
+                                queue.UserPrintTicket.Duplexing = targetDuplex;
+                            }
+                            if (queue.DefaultPrintTicket != null)
+                            {
+                                queue.DefaultPrintTicket.Duplexing = targetDuplex;
+                            }
+                            queue.Commit();
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"修改打印机双面模式失败: {ex.Message}");
+            // 即使修改失败，也继续打印，不阻断主流程
+        }
+    }
+
+    /// <summary>
+    /// 自定义打印机和双面设置打印 Word 或 PDF 文档
+    /// </summary>
+    public static void PrintFileWithSettings(string filePath, string printerName, string duplexMode)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("待打印的文件不存在", filePath);
+
+        // 1. 尝试修改打印机双面模式
+        SetPrinterDuplex(printerName, duplexMode);
+
+        string ext = Path.GetExtension(filePath).ToLower();
+        if (ext == ".docx")
+        {
+            Type? wordType = Type.GetTypeFromProgID("Word.Application");
+            if (wordType != null)
+            {
+                object? wordApp = null;
+                object? doc = null;
+                try
+                {
+                    wordApp = Activator.CreateInstance(wordType);
+                    if (wordApp != null)
+                    {
+                        wordType.InvokeMember("Visible", System.Reflection.BindingFlags.SetProperty, null, wordApp, new object[] { false });
+                        
+                        // 设置当前活动打印机
+                        wordType.InvokeMember("ActivePrinter", System.Reflection.BindingFlags.SetProperty, null, wordApp, new object[] { printerName });
+
+                        object? docs = wordType.InvokeMember("Documents", System.Reflection.BindingFlags.GetProperty, null, wordApp, null);
+                        if (docs != null)
+                        {
+                            doc = docs.GetType().InvokeMember("Open", System.Reflection.BindingFlags.InvokeMethod, null, docs, new object[] { filePath });
+                            if (doc != null)
+                            {
+                                doc.GetType().InvokeMember("PrintOut", System.Reflection.BindingFlags.InvokeMethod, null, doc, null);
+                                return;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Word COM 打印失败: {ex.Message}");
+                    throw new Exception($"Word 打印失败: {ex.Message}");
+                }
+                finally
+                {
+                    if (doc != null)
+                    {
+                        try
+                        {
+                            doc.GetType().InvokeMember("Close", System.Reflection.BindingFlags.InvokeMethod, null, doc, new object[] { 0 /* wdDoNotSaveChanges = 0 */ });
+                        }
+                        catch { }
+                    }
+                    if (wordApp != null)
+                    {
+                        try
+                        {
+                            wordType.InvokeMember("Quit", System.Reflection.BindingFlags.InvokeMethod, null, wordApp, null);
+                        }
+                        catch { }
+                    }
+                }
+            }
+        }
+
+        // 2. 对于 PDF 或在没有 Word COM 的情况下，调用默认或 Microsoft Edge 进行静默打印
+        try
+        {
+            // 尝试检测本地 Edge 路径并以静默参数执行
+            string edgePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Microsoft\Edge\Application\msedge.exe");
+            if (!File.Exists(edgePath))
+            {
+                edgePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Microsoft\Edge\Application\msedge.exe");
+            }
+
+            if (File.Exists(edgePath))
+            {
+                // Edge headless print to printer
+                System.Diagnostics.ProcessStartInfo edgeInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = edgePath,
+                    Arguments = $"--headless --print-to-printer --printer-name=\"{printerName}\" \"{filePath}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                };
+                using (var p = System.Diagnostics.Process.Start(edgeInfo))
+                {
+                    p?.WaitForExit(5000);
+                }
+            }
+            else
+            {
+                // 回退到系统 print 动词（使用默认打印机设置，因为可能无法设置非默认打印机）
+                System.Diagnostics.ProcessStartInfo info = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = filePath,
+                    Verb = "print",
+                    UseShellExecute = true,
+                    CreateNoWindow = true,
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                };
+                using (var p = System.Diagnostics.Process.Start(info))
+                {
+                    p?.WaitForExit(3000);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"PDF/其它文档打印失败: {ex.Message}，可能是系统没有默认的 PDF 关联程序。");
+        }
+    }
 }

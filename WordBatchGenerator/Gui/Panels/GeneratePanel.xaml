@@ -8,13 +8,13 @@
       Background="Transparent">
 
     <Page.Resources>
-        <!-- Word 蓝灰色（莫兰迪）按钮样式 -->
+        <!-- Word 蓝绿色（莫兰迪）按钮样式 -->
         <Style x:Key="WordButton" TargetType="Button">
             <Setter Property="FontFamily" Value="Microsoft YaHei"/>
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#738896"/>
+            <Setter Property="Background" Value="#7A9BA3"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="16,8"/>
@@ -28,7 +28,7 @@
                                     <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#000000"/>
                                 </Border.Effect>
                             </Border>
-                            <Border x:Name="hover" Background="#5E707C" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <Border x:Name="hover" Background="#688890" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -36,7 +36,7 @@
                                 <Setter TargetName="hover" Property="Opacity" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#4C5A64"/>
+                                <Setter TargetName="border" Property="Background" Value="#56747D"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.5"/>
@@ -53,7 +53,7 @@
             <Setter Property="FontSize" Value="13.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="#9C8381"/>
+            <Setter Property="Background" Value="#C58D82"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="16,8"/>
@@ -67,7 +67,7 @@
                                     <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#000000"/>
                                 </Border.Effect>
                             </Border>
-                            <Border x:Name="hover" Background="#826C6A" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <Border x:Name="hover" Background="#B2796F" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                         <ControlTemplate.Triggers>
@@ -75,7 +75,7 @@
                                 <Setter TargetName="hover" Property="Opacity" Value="1"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#6A5756"/>
+                                <Setter TargetName="border" Property="Background" Value="#9F665C"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.5"/>
@@ -732,6 +732,31 @@
                                             Click="BtnMergePdf_Click"/>
                                 </StackPanel>
                             </Grid>
+                        </Border>
+
+                        <!-- 合并进度条 -->
+                        <Border x:Name="PanelMergeProgress"
+                                Background="#F7F4EF"
+                                BorderBrush="#EBE7DE"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="16"
+                                Margin="0,16,0,0"
+                                Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock x:Name="TxtMergeProgress"
+                                           Text="正在合并文档，请稍候..."
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="#1F2421"
+                                           Margin="0,0,0,10"/>
+                                <ProgressBar x:Name="MergeProgressBar"
+                                             Height="8"
+                                             IsIndeterminate="True"
+                                             Foreground="#7A9BA3"
+                                             Background="#EBE7DE"
+                                             BorderThickness="0"/>
+                            </StackPanel>
                         </Border>
 
                         <!-- 合并结果展示 -->

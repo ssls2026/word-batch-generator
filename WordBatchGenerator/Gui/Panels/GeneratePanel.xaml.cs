@@ -817,11 +817,21 @@ public partial class GeneratePanel : Page
             {
                 try
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    string ext = Path.GetExtension(fullPath).ToLower();
+                    if (ext == ".pdf")
                     {
-                        FileName = fullPath,
-                        UseShellExecute = true
-                    });
+                        var pdfViewer = new WordBatchGenerator.Gui.PdfViewerWindow(fullPath);
+                        pdfViewer.Owner = Window.GetWindow(this);
+                        pdfViewer.ShowDialog();
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = fullPath,
+                            UseShellExecute = true
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1016,10 +1026,9 @@ public partial class GeneratePanel : Page
         var fileName = $"合并文档_{_currentScheme?.Name ?? "未命名"}.docx";
         var destPath = Path.Combine(outputDir, fileName);
 
-        // 显示进度动画与提示
-        PanelProgress.Visibility = Visibility.Visible;
-        ProgressBar.IsIndeterminate = true;
-        TxtProgress.Text = "正在合并 Word 文档，请稍候...";
+        // 显示合并进度动画与提示
+        PanelMergeProgress.Visibility = Visibility.Visible;
+        TxtMergeProgress.Text = "正在合并 Word 文档，请稍候...";
         BtnMergeWord.IsEnabled = false;
         BtnMergePdf.IsEnabled = false;
 
@@ -1056,9 +1065,8 @@ public partial class GeneratePanel : Page
         }
         finally
         {
-            // 恢复进度面板与按钮状态
-            ProgressBar.IsIndeterminate = false;
-            PanelProgress.Visibility = Visibility.Collapsed;
+            // 恢复合并进度面板与按钮状态
+            PanelMergeProgress.Visibility = Visibility.Collapsed;
             BtnMergeWord.IsEnabled = true;
             BtnMergePdf.IsEnabled = true;
         }
@@ -1091,10 +1099,9 @@ public partial class GeneratePanel : Page
         var destPath = Path.Combine(outputDir, fileName);
         var tempDocx = Path.Combine(outputDir, $"~temp_merge_{Guid.NewGuid():N}.docx");
 
-        // 显示进度动画与提示
-        PanelProgress.Visibility = Visibility.Visible;
-        ProgressBar.IsIndeterminate = true;
-        TxtProgress.Text = "正在合并并转换为 PDF 文档，转换过程可能耗时较长，请稍候...";
+        // 显示合并进度动画与提示
+        PanelMergeProgress.Visibility = Visibility.Visible;
+        TxtMergeProgress.Text = "正在合并并转换为 PDF 文档，转换过程可能耗时较长，请稍候...";
         BtnMergeWord.IsEnabled = false;
         BtnMergePdf.IsEnabled = false;
 
@@ -1158,9 +1165,8 @@ public partial class GeneratePanel : Page
                 catch { }
             }
 
-            // 恢复进度面板与按钮状态
-            ProgressBar.IsIndeterminate = false;
-            PanelProgress.Visibility = Visibility.Collapsed;
+            // 恢复合并进度面板与按钮状态
+            PanelMergeProgress.Visibility = Visibility.Collapsed;
             BtnMergeWord.IsEnabled = true;
             BtnMergePdf.IsEnabled = true;
         }
@@ -1174,11 +1180,21 @@ public partial class GeneratePanel : Page
             {
                 try
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    string ext = Path.GetExtension(fullPath).ToLower();
+                    if (ext == ".pdf")
                     {
-                        FileName = fullPath,
-                        UseShellExecute = true
-                    });
+                        var pdfViewer = new WordBatchGenerator.Gui.PdfViewerWindow(fullPath);
+                        pdfViewer.Owner = Window.GetWindow(this);
+                        pdfViewer.ShowDialog();
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = fullPath,
+                            UseShellExecute = true
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1220,17 +1236,22 @@ public partial class GeneratePanel : Page
         {
             if (File.Exists(fullPath))
             {
-                try
+                var printWindow = new PrintWindow();
+                printWindow.Owner = Window.GetWindow(this);
+                if (printWindow.ShowDialog() == true)
                 {
-                    this.Cursor = System.Windows.Input.Cursors.Wait;
-                    Generator.PrintDocument(fullPath);
-                    this.Cursor = System.Windows.Input.Cursors.Arrow;
-                    MessageBox.Show("打印任务已发送到您的默认打印机！", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    this.Cursor = System.Windows.Input.Cursors.Arrow;
-                    MessageBox.Show($"打印合并文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    try
+                    {
+                        this.Cursor = System.Windows.Input.Cursors.Wait;
+                        Generator.PrintFileWithSettings(fullPath, printWindow.SelectedPrinter, printWindow.SelectedDuplex);
+                        this.Cursor = System.Windows.Input.Cursors.Arrow;
+                        MessageBox.Show("打印任务已成功发送！", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Cursor = System.Windows.Input.Cursors.Arrow;
+                        MessageBox.Show($"打印合并文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             else

@@ -6,3 +6,4 @@ global using WpfOpenFileDialog = Microsoft.Win32.OpenFileDialog;
 global using WpfSaveFileDialog = Microsoft.Win32.SaveFileDialog;
 // Remove global using System.Windows.Forms to avoid type conflicts
 // Use fully-qualified System.Windows.Forms.FolderBrowserDialog where needed
+global using MessageBox = WordBatchGenerator.Gui.ModernMessageBox;
