@@ -50,7 +50,7 @@ public partial class GeneratePanel : Page
         }
         else
         {
-            TxtCurrentSchemeName.Text = "（未加载任何方案，请先在【方案管理】中选择使用）";
+            TxtCurrentSchemeName.Text = "未选择";
             BtnGenerate.IsEnabled = false;
         }
     }
@@ -301,6 +301,40 @@ public partial class GeneratePanel : Page
             MessageBox.Show($"读取 Excel 失败: {ex.Message}", "错误",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    /// <summary>
+    /// 点击方案徽章弹出可选方案菜单
+    /// </summary>
+    private void BtnSelectScheme_Click(object sender, RoutedEventArgs e)
+    {
+        var schemes = SchemeManager.GetAllSchemes();
+        if (schemes == null || schemes.Count == 0)
+        {
+            MessageBox.Show("当前没有可用方案，请先去【创建新方案】进行创建。", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var menu = new ContextMenu();
+        foreach (var s in schemes)
+        {
+            var item = new MenuItem
+            {
+                Header = s.Name,
+                IsCheckable = true,
+                IsChecked = (_currentScheme != null && _currentScheme.Name == s.Name)
+            };
+            item.Click += (sender2, e2) =>
+            {
+                LoadScheme(s.Name);
+                SchemeManager.SaveLastScheme(s.Name);
+            };
+            menu.Items.Add(item);
+        }
+
+        menu.PlacementTarget = BtnSelectScheme;
+        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        menu.IsOpen = true;
     }
 
     /// <summary>
