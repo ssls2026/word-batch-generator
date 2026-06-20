@@ -20,6 +20,8 @@ public partial class GeneratePanel : Page
     private Dictionary<string, TextBox> _textBoxes = new();
     private Dictionary<string, CheckBox> _checkBoxes = new();
     private bool _isInitializing = false;
+    private List<string> _generatedFullPaths = new();
+    private List<MergedFileItem> _mergedFiles = new();
 
     public GeneratePanel()
     {
@@ -70,18 +72,33 @@ public partial class GeneratePanel : Page
             TxtFileNameTemplate.Text = _currentScheme.FileNameTemplate;
 
             // 初始化子目录下拉变量
-            CmbSubfolderVar.ItemsSource = _currentScheme.Variables;
-            if (!string.IsNullOrEmpty(_currentScheme.DefaultSubfolderVar) && _currentScheme.Variables.Contains(_currentScheme.DefaultSubfolderVar))
+            CmbSubfolderVar.SelectionChanged -= CmbSubfolderVar_SelectionChanged;
+            CmbSubfolderVar.Items.Clear();
+            CmbSubfolderVar.Items.Add("[ 插入变量 ]");
+            foreach (var varName in _currentScheme.Variables)
+            {
+                CmbSubfolderVar.Items.Add(varName);
+            }
+            CmbSubfolderVar.SelectedIndex = 0;
+            CmbSubfolderVar.SelectionChanged += CmbSubfolderVar_SelectionChanged;
+
+            if (!string.IsNullOrEmpty(_currentScheme.DefaultSubfolderVar))
             {
                 ChkSubfolder.IsChecked = true;
-                CmbSubfolderVar.SelectedItem = _currentScheme.DefaultSubfolderVar;
-                CmbSubfolderVar.IsEnabled = true;
+                TxtSubfolderRule.Text = _currentScheme.DefaultSubfolderVar;
+                GridSubfolderVar.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ChkSubfolder.IsChecked = false;
+                TxtSubfolderRule.Text = string.Empty;
+                GridSubfolderVar.Visibility = Visibility.Collapsed;
             }
 
             // 初始化插入变量下拉菜单
             CmbInsertVariable.SelectionChanged -= CmbInsertVariable_SelectionChanged;
             CmbInsertVariable.Items.Clear();
-            CmbInsertVariable.Items.Add("[ 选择变量插入 ]");
+            CmbInsertVariable.Items.Add("[ 插入变量 ]");
             CmbInsertVariable.Items.Add("序号");
             foreach (var varName in _currentScheme.Variables)
             {
@@ -134,6 +151,13 @@ public partial class GeneratePanel : Page
 
             PanelResults.Visibility = Visibility.Collapsed;
             ResultItemsControl.ItemsSource = null;
+            _mergedFiles.Clear();
+            if (MergedResultsItemsControl != null)
+            {
+                MergedResultsItemsControl.ItemsSource = null;
+                MergedResultsItemsControl.Visibility = Visibility.Collapsed;
+            }
+            UpdateSubfolderPreview();
         }
 
         _isInitializing = false;
@@ -145,7 +169,10 @@ public partial class GeneratePanel : Page
     private void CmbSchemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (CmbSchemes.SelectedItem is string schemeName)
+        {
             LoadScheme(schemeName);
+            SchemeManager.SaveLastScheme(schemeName);
+        }
     }
 
     /// <summary>
@@ -196,6 +223,7 @@ public partial class GeneratePanel : Page
             TxtExcelPath.Text = dialog.FileName;
             LoadExcelPreview(dialog.FileName);
             BtnOpenExcel.IsEnabled = true;
+            UpdateSubfolderPreview();
         }
     }
 
@@ -301,6 +329,7 @@ public partial class GeneratePanel : Page
         if (dialog.ShowDialog() == true)
         {
             TxtOutputDir.Text = dialog.FolderName;
+            UpdateSubfolderPreview();
             AutoSaveConfig();
         }
     }
@@ -349,6 +378,9 @@ public partial class GeneratePanel : Page
         // 显示进度 UI
         PanelProgress.Visibility = Visibility.Visible;
         PanelResults.Visibility = Visibility.Collapsed;
+        _mergedFiles.Clear();
+        MergedResultsItemsControl.ItemsSource = null;
+        MergedResultsItemsControl.Visibility = Visibility.Collapsed;
         BtnGenerate.IsEnabled = false;
 
         try
@@ -387,20 +419,25 @@ public partial class GeneratePanel : Page
 
             // 渲染生成结果
             var generatedFiles = new List<string>();
+            _generatedFullPaths.Clear();
             foreach (var data in _excelData)
             {
                 var rawFileName = Generator.ReplaceVariables(fileNameTemplate, data);
                 var fileName = Generator.SanitizeFileName(rawFileName);
+                string relativePath = "";
 
                 if (!string.IsNullOrEmpty(subfolderVar) && data.TryGetValue(subfolderVar, out var subDirValue) && !string.IsNullOrEmpty(subDirValue))
                 {
                     var subfolder = Generator.SanitizeFileName(subDirValue);
-                    generatedFiles.Add(Path.Combine(subfolder, fileName));
+                    relativePath = Path.Combine(subfolder, fileName);
                 }
                 else
                 {
-                    generatedFiles.Add(fileName);
+                    relativePath = fileName;
                 }
+
+                generatedFiles.Add(relativePath);
+                _generatedFullPaths.Add(Path.Combine(outputDir, relativePath));
             }
 
             ResultItemsControl.ItemsSource = generatedFiles;
@@ -549,6 +586,7 @@ public partial class GeneratePanel : Page
             RefreshDataPreviewGrid(parsed);
             DataPreviewBorder.Visibility = Visibility.Visible;
             BtnGenerate.IsEnabled = true;
+            UpdateSubfolderPreview();
         }
         else
         {
@@ -678,7 +716,7 @@ public partial class GeneratePanel : Page
 
         _currentScheme.DefaultOutputDir = TxtOutputDir.Text;
         _currentScheme.FileNameTemplate = TxtFileNameTemplate.Text;
-        _currentScheme.DefaultSubfolderVar = ChkSubfolder.IsChecked == true ? (CmbSubfolderVar.SelectedItem as string ?? string.Empty) : string.Empty;
+        _currentScheme.DefaultSubfolderVar = ChkSubfolder.IsChecked == true ? (TxtSubfolderRule.Text ?? string.Empty) : string.Empty;
         _currentScheme.LastTabIndex = DataInputTabs.SelectedIndex;
 
         _currentScheme.PastedTexts.Clear();
@@ -708,16 +746,45 @@ public partial class GeneratePanel : Page
 
     private void ChkSubfolder_Changed(object sender, RoutedEventArgs e)
     {
-        if (CmbSubfolderVar != null)
+        if (GridSubfolderVar != null)
         {
-            CmbSubfolderVar.IsEnabled = ChkSubfolder.IsChecked == true;
+            GridSubfolderVar.Visibility = ChkSubfolder.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         }
+        UpdateSubfolderPreview();
+        AutoSaveConfig();
+    }
+
+    private void TxtSubfolderRule_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        UpdateSubfolderPreview();
+        AutoSaveConfig();
+    }
+
+    private void TxtFileNameTemplate_TextChanged(object sender, TextChangedEventArgs e)
+    {
         AutoSaveConfig();
     }
 
     private void CmbSubfolderVar_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        AutoSaveConfig();
+        if (CmbSubfolderVar.SelectedIndex > 0)
+        {
+            var selectedVar = CmbSubfolderVar.SelectedItem as string;
+            if (!string.IsNullOrEmpty(selectedVar))
+            {
+                string insertText = "{{" + selectedVar + "}}";
+                int selectionStart = TxtSubfolderRule.SelectionStart;
+                string currentText = TxtSubfolderRule.Text ?? string.Empty;
+                
+                TxtSubfolderRule.Text = currentText.Insert(selectionStart, insertText);
+                TxtSubfolderRule.SelectionStart = selectionStart + insertText.Length;
+                TxtSubfolderRule.Focus();
+                
+                AutoSaveConfig();
+                UpdateSubfolderPreview();
+            }
+            CmbSubfolderVar.SelectedIndex = 0;
+        }
     }
 
     private void BtnFileNameHelp_TextChanged(object sender, TextChangedEventArgs e)
@@ -758,33 +825,15 @@ public partial class GeneratePanel : Page
             if (!string.IsNullOrEmpty(selectedVar))
             {
                 string insertText = "{{" + selectedVar + "}}";
-                string currentText = TxtFileNameTemplate.Text;
-
-                if (string.IsNullOrEmpty(currentText) || currentText == "文档-{{序号}}" || currentText == "文档-{{序号}}.docx")
-                {
-                    TxtFileNameTemplate.Text = insertText + ".docx";
-                }
-                else
-                {
-                    string baseText = currentText;
-                    if (baseText.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
-                    {
-                        baseText = baseText.Substring(0, baseText.Length - 5);
-                    }
-
-                    if (string.IsNullOrEmpty(baseText))
-                    {
-                        TxtFileNameTemplate.Text = insertText + ".docx";
-                    }
-                    else
-                    {
-                        TxtFileNameTemplate.Text = baseText + "-" + insertText + ".docx";
-                    }
-                }
+                int selectionStart = TxtFileNameTemplate.SelectionStart;
+                string currentText = TxtFileNameTemplate.Text ?? string.Empty;
+                
+                TxtFileNameTemplate.Text = currentText.Insert(selectionStart, insertText);
+                TxtFileNameTemplate.SelectionStart = selectionStart + insertText.Length;
+                TxtFileNameTemplate.Focus();
+                
                 AutoSaveConfig();
             }
-
-            // 重置回默认占位选项
             CmbInsertVariable.SelectedIndex = 0;
         }
     }
@@ -877,11 +926,268 @@ public partial class GeneratePanel : Page
             {
                 Header = key,
                 Binding = new System.Windows.Data.Binding($"[{key}]"),
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star)
+                Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                ElementStyle = centerTextBlockStyle,
+                HeaderStyle = centerHeaderStyle
             };
             DataPreviewGrid.Columns.Add(column);
         }
 
         DataPreviewGrid.ItemsSource = previewList;
     }
+
+    private void UpdateSubfolderPreview()
+    {
+        if (TxtSubfolderPreview == null || TxtSubfolderRule == null) return;
+
+        if (ChkSubfolder.IsChecked != true || string.IsNullOrEmpty(TxtSubfolderRule.Text))
+        {
+            TxtSubfolderPreview.Text = "";
+            return;
+        }
+
+        string rule = TxtSubfolderRule.Text;
+        string outputDir = TxtOutputDir.Text;
+        if (string.IsNullOrEmpty(outputDir))
+        {
+            outputDir = "C:\\Users\\lzs\\Documents";
+        }
+
+        var sampleData = _excelData?.FirstOrDefault() ?? new Dictionary<string, string>();
+        if (sampleData.Count == 0 && _currentScheme != null)
+        {
+            foreach (var v in _currentScheme.Variables)
+            {
+                sampleData[v] = $"[{v}]";
+            }
+            sampleData["序号"] = "1";
+        }
+
+        try
+        {
+            string subfolder = Generator.ResolveSubfolder(rule, sampleData);
+            if (!string.IsNullOrEmpty(subfolder))
+            {
+                string fullPath = Path.Combine(outputDir, subfolder);
+                TxtSubfolderPreview.Text = $"💡 路径示例：{fullPath}\\文档-1.docx";
+            }
+            else
+            {
+                TxtSubfolderPreview.Text = $"💡 路径示例：{outputDir}\\文档-1.docx";
+            }
+        }
+        catch
+        {
+            TxtSubfolderPreview.Text = "";
+        }
+    }
+
+    // ================= 文件合并与 PDF 转换逻辑 =================
+
+    private void BtnMergeWord_Click(object sender, RoutedEventArgs e)
+    {
+        if (_generatedFullPaths == null || _generatedFullPaths.Count == 0)
+        {
+            MessageBox.Show("没有已生成的文档可供合并！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var defaultName = $"合并文档_{_currentScheme?.Name ?? "未命名"}_{DateTime.Now:yyyyMMddHHmmss}.docx";
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "Word 文档 (*.docx)|*.docx",
+            FileName = defaultName,
+            Title = "合并为单个 Word 文档"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                this.Cursor = System.Windows.Input.Cursors.Wait;
+                Generator.MergeWordFiles(_generatedFullPaths, dialog.FileName);
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
+
+                MessageBox.Show("合并成功！已将合并后的文档列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                var mergedItem = new MergedFileItem
+                {
+                    DisplayName = Path.GetFileName(dialog.FileName),
+                    FullPath = dialog.FileName
+                };
+                _mergedFiles.Add(mergedItem);
+
+                MergedResultsItemsControl.ItemsSource = null;
+                MergedResultsItemsControl.ItemsSource = _mergedFiles;
+                MergedResultsItemsControl.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
+                MessageBox.Show($"合并 Word 文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private void BtnMergePdf_Click(object sender, RoutedEventArgs e)
+    {
+        if (_generatedFullPaths == null || _generatedFullPaths.Count == 0)
+        {
+            MessageBox.Show("没有已生成的文档可供合并！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        // 检查本地 Word 是否可用
+        Type? wordType = Type.GetTypeFromProgID("Word.Application");
+        if (wordType == null)
+        {
+            MessageBox.Show("未检测到本地已安装 Microsoft Word 软件，无法进行 PDF 转换。\n请确保电脑上安装了 Microsoft Office Word。", "环境不支持", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var defaultName = $"合并文档_{_currentScheme?.Name ?? "未命名"}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "PDF 文档 (*.pdf)|*.pdf",
+            FileName = defaultName,
+            Title = "合并并转换为单个 PDF 文档"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            var tempDocx = Path.Combine(Path.GetDirectoryName(dialog.FileName) ?? TxtOutputDir.Text, $"~temp_merge_{Guid.NewGuid():N}.docx");
+            try
+            {
+                this.Cursor = System.Windows.Input.Cursors.Wait;
+
+                // 1. 合并为临时 Word 文档
+                Generator.MergeWordFiles(_generatedFullPaths, tempDocx);
+
+                // 2. 转换为 PDF
+                bool convertSuccess = Generator.ConvertDocxToPdfDynamic(tempDocx, dialog.FileName);
+
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
+
+                if (convertSuccess)
+                {
+                    MessageBox.Show("合并并转换为 PDF 成功！已将合并后的 PDF 文件列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    var mergedItem = new MergedFileItem
+                    {
+                        DisplayName = Path.GetFileName(dialog.FileName),
+                        FullPath = dialog.FileName
+                    };
+                    _mergedFiles.Add(mergedItem);
+
+                    MergedResultsItemsControl.ItemsSource = null;
+                    MergedResultsItemsControl.ItemsSource = _mergedFiles;
+                    MergedResultsItemsControl.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    MessageBox.Show("转换为 PDF 失败，请检查 Microsoft Word 运行状态。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Cursor = System.Windows.Input.Cursors.Arrow;
+                MessageBox.Show($"合并或转换 PDF 失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // 清理临时文件
+                if (File.Exists(tempDocx))
+                {
+                    try
+                    {
+                        File.Delete(tempDocx);
+                    }
+                    catch { }
+                }
+            }
+        }
+    }
+
+    private void BtnOpenMergedResult_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is string fullPath)
+        {
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = fullPath,
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"打开合并文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("合并的文件已被移动或删除！", "文件不存在", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+    }
+
+    private void BtnLocateMergedResult_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is string fullPath)
+        {
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{fullPath}\"");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"定位合并文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("合并的文件已被移动或删除！", "文件不存在", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+    }
+
+    private void BtnPrintMergedResult_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is string fullPath)
+        {
+            if (File.Exists(fullPath))
+            {
+                try
+                {
+                    this.Cursor = System.Windows.Input.Cursors.Wait;
+                    Generator.PrintDocument(fullPath);
+                    this.Cursor = System.Windows.Input.Cursors.Arrow;
+                    MessageBox.Show("打印任务已发送到您的默认打印机！", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    this.Cursor = System.Windows.Input.Cursors.Arrow;
+                    MessageBox.Show($"打印合并文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("合并的文件已被移动或删除！", "文件不存在", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+    }
+}
+
+/// <summary>
+/// 合并后的文件项模型
+/// </summary>
+public class MergedFileItem
+{
+    public string DisplayName { get; set; } = string.Empty;
+    public string FullPath { get; set; } = string.Empty;
 }

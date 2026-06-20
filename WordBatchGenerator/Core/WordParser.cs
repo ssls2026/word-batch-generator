@@ -327,13 +327,13 @@ public class WordParser
         sb.AppendLine("<!DOCTYPE html>");
         sb.AppendLine("<html><head><meta charset='utf-8'>");
         sb.AppendLine("<style>");
-        sb.AppendLine("body { font-family: '微软雅黑', 'Microsoft YaHei', '宋体', SimSun; font-size: 15px; color: #1e293b; background-color: #F7F4EF; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; }");
+        sb.AppendLine("body { font-family: '微软雅黑', 'Microsoft YaHei', '宋体', SimSun; font-size: 15px; color: #1e293b; background-color: #F1F5F9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start; overflow-x: hidden; }");
         sb.AppendLine("::-webkit-scrollbar { width: 6px; height: 6px; }");
         sb.AppendLine("::-webkit-scrollbar-track { background: transparent; }");
-        sb.AppendLine("::-webkit-scrollbar-thumb { background: #E3DEC5; border-radius: 3px; }");
-        sb.AppendLine("::-webkit-scrollbar-thumb:hover { background: #C4612F; }");
+        sb.AppendLine("::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }");
+        sb.AppendLine("::-webkit-scrollbar-thumb:hover { background: #94A3B8; }");
         sb.AppendLine("::selection { background: rgba(196, 97, 47, 0.18); color: #1F2421; }");
-        sb.AppendLine("#paper-container { background-color: #ffffff; width: 800px; min-height: 1000px; padding: 50px 60px; box-sizing: border-box; border-radius: 12px; border: 1px solid #E7E1D7; box-shadow: 0 6px 24px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02); transform-origin: top center; }");
+        sb.AppendLine("#paper-container { background-color: #ffffff; width: 800px; min-height: 1000px; padding: 50px 60px; box-sizing: border-box; border-radius: 4px; border: 1px solid #E2E8F0; box-shadow: 0 4px 10px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.01); transform-origin: top center; }");
         sb.AppendLine("p { margin: 0; padding: 0; }");
         sb.AppendLine("table { border-collapse: collapse; width: 100%; margin: 15px 0; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }");
         sb.AppendLine("td { border: 1px solid #cbd5e1; padding: 10px 12px; vertical-align: middle; }");

@@ -90,7 +90,11 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="BtnBorder" Background="{TemplateBinding Background}" CornerRadius="8">
+                        <Border x:Name="BtnBorder" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -144,7 +148,7 @@
             </Setter>
         </Style>
 
-        <!-- Use Scheme Button (Slate Blue) -->
+        <!-- Use Scheme Button (Slate Blue - Keep as primary Morandi action color) -->
         <Style x:Key="UseCardButton" TargetType="Button" BasedOn="{StaticResource CardActionButton}">
             <Setter Property="Background" Value="{StaticResource SlateBlueBrush}"/>
             <Style.Triggers>
@@ -157,41 +161,53 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Edit Scheme Button (Sage Green) -->
+        <!-- Edit Scheme Button (Secondary Outline style) -->
         <Style x:Key="EditCardButton" TargetType="Button" BasedOn="{StaticResource CardActionButton}">
-            <Setter Property="Background" Value="{StaticResource SageGreenBrush}"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceWhiteBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource SageGreenHoverBrush}"/>
+                    <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BorderEmphasisBrush}"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#304F3E"/>
+                    <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Export Scheme Button (Warm Clay) -->
+        <!-- Export Scheme Button (Secondary Outline style) -->
         <Style x:Key="ExportCardButton" TargetType="Button" BasedOn="{StaticResource CardActionButton}">
-            <Setter Property="Background" Value="{StaticResource WarmClayBrush}"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceWhiteBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource WarmClayHoverBrush}"/>
+                    <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BorderEmphasisBrush}"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#996135"/>
+                    <Setter Property="Background" Value="{StaticResource DividerBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Delete Scheme Button (Muted Rose Red) -->
+        <!-- Delete Scheme Button (Low-saturation Danger style) -->
         <Style x:Key="DeleteCardButton" TargetType="Button" BasedOn="{StaticResource CardActionButton}">
-            <Setter Property="Background" Value="{StaticResource MutedRedBrush}"/>
+            <Setter Property="Background" Value="#FEE2E2"/>
+            <Setter Property="Foreground" Value="#EF4444"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource MutedRedHoverBrush}"/>
+                    <Setter Property="Background" Value="#FCA5A5"/>
+                    <Setter Property="Foreground" Value="#DC2626"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#9E3D3D"/>
+                    <Setter Property="Background" Value="#F87171"/>
                 </Trigger>
             </Style.Triggers>
         </Style>

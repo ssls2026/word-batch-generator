@@ -7,175 +7,293 @@
       d:DesignHeight="680" d:DesignWidth="860"
       Background="Transparent">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="20" Opacity="0">
-            <StackPanel.RenderTransform>
-                <TranslateTransform Y="25"/>
-            </StackPanel.RenderTransform>
-            <StackPanel.Triggers>
-                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             To="1"
-                                             Duration="0:0:0.35">
-                                <DoubleAnimation.EasingFunction>
-                                    <CubicEase EasingMode="EaseOut"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                             To="0"
-                                             Duration="0:0:0.45">
-                                <DoubleAnimation.EasingFunction>
-                                    <CubicEase EasingMode="EaseOut"/>
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </StackPanel.Triggers>
-            <!-- 页面标题 -->
+    <Grid Margin="20" Opacity="0">
+        <Grid.RenderTransform>
+            <TranslateTransform Y="25"/>
+        </Grid.RenderTransform>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         To="1"
+                                         Duration="0:0:0.35">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                         To="0"
+                                         Duration="0:0:0.45">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+        
+        <Grid.RowDefinitions>
+            <!-- Row 0: Title -->
+            <RowDefinition Height="Auto"/>
+            <!-- Row 1: Scrollable Content -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 页面标题 -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
             <TextBlock Text="批量生成文件"
-                       FontSize="28"
+                       FontSize="22"
                        FontWeight="Bold"
                        Foreground="#1F2421"
-                       Margin="0,0,0,8"/>
+                       Margin="0,0,0,2"/>
             <TextBlock Text="选择方案 → 导入数据 → 一键生成"
-                       FontSize="14"
-                       Foreground="#5C635D"
-                       Margin="0,0,0,24"/>
+                       FontSize="12.5"
+                       Foreground="#5C635D"/>
+        </StackPanel>
 
-            <!-- ===== 选择方案 ===== -->
-            <Border Background="White"
-                    BorderBrush="#E7E1D7"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="20"
-                    Margin="0,0,0,16">
-                <StackPanel>
-                    <TextBlock Text="选择方案"
-                               FontSize="14"
-                               FontWeight="SemiBold"
-                               Foreground="#1F2421"
-                               Margin="0,0,0,8"/>
-                    <ComboBox x:Name="CmbSchemes"
-                              Height="44"
-                              FontSize="14"
-                              Padding="10,0"
-                              Background="White"
-                              BorderBrush="#E7E1D7"
-                              BorderThickness="1.5"
-                              VerticalContentAlignment="Center"
-                              IsEditable="False"
-                              SelectionChanged="CmbSchemes_SelectionChanged"/>
-                </StackPanel>
-            </Border>
+        <!-- Scrollable Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12">
+            <StackPanel Margin="0,0,12,0">
+                <!-- ===== 选择方案与开始生成 ===== -->
+                <Border Background="White"
+                        BorderBrush="#E7E1D7"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-            <!-- ===== 数据输入源双页签 ===== -->
-            <Border Background="White"
-                    BorderBrush="#E7E1D7"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="20"
-                    Margin="0,0,0,16">
-                <StackPanel>
-                    <TabControl x:Name="DataInputTabs" 
-                                BorderThickness="0,1,0,0" 
-                                BorderBrush="#EBE7DE"
-                                Background="Transparent"
-                                SelectionChanged="DataInputTabs_SelectionChanged">
-                        <!-- 页签 1: 📊 导入 Excel 数据 -->
-                        <TabItem Header="📊 导入 Excel 数据" Padding="12,6">
-                            <StackPanel Margin="0,16,0,0">
-                                <TextBlock Text="Excel 数据源"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="#1F2421"
-                                           Margin="0,0,0,8"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+                        <!-- Left side: dropdown selection -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="选择方案"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="#1F2421"
+                                       Margin="0,0,0,8"/>
+                            <ComboBox x:Name="CmbSchemes"
+                                      Width="320"
+                                      HorizontalAlignment="Left"
+                                      Height="40"
+                                      FontSize="14"
+                                      Padding="10,0"
+                                      Background="White"
+                                      BorderBrush="#E7E1D7"
+                                      BorderThickness="1.5"
+                                      VerticalContentAlignment="Center"
+                                      IsEditable="False"
+                                      SelectionChanged="CmbSchemes_SelectionChanged"/>
+                        </StackPanel>
 
-                                    <TextBox x:Name="TxtExcelPath"
-                                             Grid.Column="0"
-                                             Height="44"
-                                             FontSize="14"
-                                             IsReadOnly="True"
-                                             Background="#F7F4EF"
-                                             BorderBrush="#E7E1D7"
-                                             BorderThickness="1.5"
-                                             VerticalContentAlignment="Center"
-                                             Margin="0,0,12,0"
-                                             Tag="请选择或拖入 Excel 数据源文件路径..."/>
+                        <!-- Right side: start generation button -->
+                        <Button Grid.Column="1"
+                                x:Name="BtnGenerate"
+                                Content="🚀 开始批量生成"
+                                Width="240"
+                                Height="40"
+                                FontSize="14.5"
+                                FontWeight="Bold"
+                                Foreground="White"
+                                Background="{StaticResource SageGreenBrush}"
+                                Cursor="Hand"
+                                VerticalAlignment="Bottom"
+                                Click="BtnGenerate_Click"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Button.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Button.RenderTransform>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Grid x:Name="BtnGrid">
+                                        <!-- Base Border with Shadow -->
+                                        <Border x:Name="BaseBorder" Background="{TemplateBinding Background}" CornerRadius="10">
+                                            <Border.Effect>
+                                                <DropShadowEffect x:Name="BtnShadow" BlurRadius="8" ShadowDepth="1.5" Opacity="0.08" Color="#000000"/>
+                                            </Border.Effect>
+                                        </Border>
+                                        <!-- Hover Border Overlay -->
+                                        <Border x:Name="HoverBorder" Background="{StaticResource SageGreenHoverBrush}" CornerRadius="10" Opacity="0"/>
+                                        <!-- Pressed Border Overlay -->
+                                        <Border x:Name="PressedBorder" Background="#385846" CornerRadius="10" Opacity="0"/>
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Trigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                         Storyboard.TargetProperty="Opacity"
+                                                                         To="1" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                         To="1.03" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                         To="1.03" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
+                                                                         Storyboard.TargetProperty="BlurRadius"
+                                                                         To="14" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
+                                                                         Storyboard.TargetProperty="Opacity"
+                                                                         To="0.16" Duration="0:0:0.15"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.EnterActions>
+                                            <Trigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                         Storyboard.TargetProperty="Opacity"
+                                                                         To="0" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                         To="1" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                         To="1" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
+                                                                         Storyboard.TargetProperty="BlurRadius"
+                                                                         To="8" Duration="0:0:0.15"/>
+                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
+                                                                         Storyboard.TargetProperty="Opacity"
+                                                                         To="0.08" Duration="0:0:0.15"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.ExitActions>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Trigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                         To="0.96" Duration="0:0:0.08"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                         To="0.96" Duration="0:0:0.08"/>
+                                                        <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                         Storyboard.TargetProperty="Opacity"
+                                                                         To="1" Duration="0:0:0.08"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.EnterActions>
+                                            <Trigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                         To="1.03" Duration="0:0:0.08"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                         To="1.03" Duration="0:0:0.08"/>
+                                                        <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                         Storyboard.TargetProperty="Opacity"
+                                                                         To="0" Duration="0:0:0.08"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.ExitActions>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Opacity" Value="0.5"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
 
-                                    <Button Grid.Column="1"
-                                            x:Name="BtnBrowseExcel"
-                                            Content="导入 Excel"
-                                            Width="110"
-                                            Height="44"
-                                            Style="{StaticResource PrimaryButton}"
-                                            Click="BtnBrowseExcel_Click"
-                                            Margin="0,0,10,0"/>
- 
-                                    <Button Grid.Column="2"
-                                            x:Name="BtnOpenExcel"
-                                            Content="打开 Excel"
-                                            Width="110"
-                                            Height="44"
-                                            FontSize="13"
-                                            FontWeight="SemiBold"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Click="BtnOpenExcel_Click"
-                                            Cursor="Hand"
-                                            Margin="0,0,10,0"
-                                            IsEnabled="False"/>
- 
-                                    <Button Grid.Column="3"
-                                            x:Name="BtnExportExcelTemplate"
-                                            Content="下载模板"
-                                            Width="110"
-                                            Height="44"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Click="BtnExportExcelTemplate_Click"/>
-                                </Grid>
-                            </StackPanel>
-                        </TabItem>
+                <!-- ===== 数据输入源双页签 ===== -->
+                <Border Background="White"
+                        BorderBrush="#E7E1D7"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TabControl x:Name="DataInputTabs" 
+                                    Background="Transparent"
+                                    SelectionChanged="DataInputTabs_SelectionChanged">
+                            <!-- 页签 1: 📊 导入 Excel 数据 -->
+                            <TabItem Header="📊 导入 Excel 数据" Padding="12,6">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="Excel 数据源"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="#1F2421"
+                                               Margin="0,0,0,8"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                        <!-- 页签 2: ✍️ 手动粘贴文本 -->
-                        <TabItem Header="✍️ 手动粘贴文本" Padding="12,6">
-                            <StackPanel Margin="0,16,0,0">
-                                <TextBlock Text="✍️ 变量数据粘贴"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="#1F2421"
-                                           Margin="0,0,0,8"/>
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300" Margin="0,4,0,0">
-                                    <UniformGrid x:Name="PasteInputsGrid" Columns="2" HorizontalAlignment="Stretch"/>
-                                </ScrollViewer>
-                            </StackPanel>
-                        </TabItem>
-                    </TabControl>
+                                        <TextBox x:Name="TxtExcelPath"
+                                                 Grid.Column="0"
+                                                 Height="44"
+                                                 FontSize="14"
+                                                 IsReadOnly="True"
+                                                 Background="#F7F4EF"
+                                                 BorderBrush="#E7E1D7"
+                                                 BorderThickness="1.5"
+                                                 VerticalContentAlignment="Center"
+                                                 Margin="0,0,12,0"
+                                                 Tag="请选择或拖入 Excel 数据源文件路径..."/>
 
-                    <!-- 公共数据预览表格 (在双页签下方) -->
-                    <Border Background="White"
-                            BorderBrush="#E7E1D7"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Margin="0,16,0,0"
-                            x:Name="DataPreviewBorder"
-                            Visibility="Collapsed">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="12"
-                                              ShadowDepth="3"
-                                              Opacity="0.04"
-                                              Color="#000000"/>
-                        </Border.Effect>
-                        <StackPanel>
-                            <Grid Margin="16,12,16,8">
+                                        <Button Grid.Column="1"
+                                                x:Name="BtnBrowseExcel"
+                                                Content="导入 Excel"
+                                                Width="110"
+                                                Height="44"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Click="BtnBrowseExcel_Click"
+                                                Margin="0,0,10,0"/>
+     
+                                        <Button Grid.Column="2"
+                                                x:Name="BtnOpenExcel"
+                                                Content="打开 Excel"
+                                                Width="110"
+                                                Height="44"
+                                                FontSize="13"
+                                                FontWeight="SemiBold"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Click="BtnOpenExcel_Click"
+                                                Cursor="Hand"
+                                                Margin="0,0,10,0"
+                                                IsEnabled="False"/>
+     
+                                        <Button Grid.Column="3"
+                                                x:Name="BtnExportExcelTemplate"
+                                                Content="下载模板"
+                                                Width="110"
+                                                Height="44"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Click="BtnExportExcelTemplate_Click"/>
+                                    </Grid>
+                                </StackPanel>
+                            </TabItem>
+
+                            <!-- 页签 2: ✍️ 手动粘贴文本 -->
+                            <TabItem Header="✍️ 手动粘贴文本" Padding="12,6">
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="✍️ 变量数据粘贴"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="#1F2421"
+                                               Margin="0,0,0,8"/>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300" Margin="0,4,0,0">
+                                        <UniformGrid x:Name="PasteInputsGrid" Columns="2" HorizontalAlignment="Stretch"/>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+
+                        <!-- 公共数据预览表格 (扁平设计已去多余线) -->
+                        <StackPanel x:Name="DataPreviewBorder" Margin="0,16,0,0" Visibility="Collapsed">
+                            <!-- 顶部细分割线 -->
+                            <Border BorderBrush="#EBE7DE" BorderThickness="0,1,0,0" Margin="0,0,0,16"/>
+                            
+                            <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -196,13 +314,7 @@
                                 </StackPanel>
                             </Grid>
                             
-                            <Border BorderBrush="#EBE7DE" BorderThickness="0,0,0,1" Margin="0,0,0,4"/>
-                            
-                            <Border BorderBrush="#EBE7DE"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Background="White"
-                                    Margin="16,4,16,16">
+                            <Border BorderBrush="#EBE7DE" BorderThickness="1" CornerRadius="8" Background="White">
                                 <DataGrid x:Name="DataPreviewGrid"
                                            AutoGenerateColumns="False"
                                            IsReadOnly="True"
@@ -237,9 +349,9 @@
                                                  <Setter.Value>
                                                      <ControlTemplate TargetType="DataGridCell">
                                                          <Border Padding="{TemplateBinding Padding}" 
-                                                                 Background="{TemplateBinding Background}" 
-                                                                 BorderThickness="0" 
-                                                                 SnapsToDevicePixels="True">
+                                                                Background="{TemplateBinding Background}" 
+                                                                BorderThickness="0" 
+                                                                SnapsToDevicePixels="True">
                                                              <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                                                          </Border>
                                                      </ControlTemplate>
@@ -256,341 +368,351 @@
                                  </DataGrid>
                             </Border>
                         </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Border>
-
-            <!-- ===== 输出配置 ===== -->
-            <Border Background="White"
-                    BorderBrush="#E7E1D7"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="20"
-                    Margin="0,0,0,16">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="12"
-                                      ShadowDepth="3"
-                                      Opacity="0.06"
-                                      Color="#000000"/>
-                </Border.Effect>
-                <StackPanel>
-                    <TextBlock Text="输出配置"
-                               FontSize="16"
-                               FontWeight="Bold"
-                               Foreground="#1F2421"
-                               Margin="0,0,0,16"/>
-
-                    <!-- 输出目录 -->
-                    <TextBlock Text="输出目录"
-                               FontSize="13"
-                               Foreground="#5C635D"
-                               Margin="0,0,0,6"/>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBox x:Name="TxtOutputDir"
-                                 Grid.Column="0"
-                                 Height="44"
-                                 FontSize="14"
-                                 IsReadOnly="True"
-                                 Background="#F7F4EF"
-                                 BorderBrush="#E7E1D7"
-                                 BorderThickness="1.5"
-                                 VerticalContentAlignment="Center"
-                                 Margin="0,0,12,0"
-                                 Tag="请选择生成的 Word 文档输出保存目录..."/>
-
-                        <Button Grid.Column="1"
-                                x:Name="BtnBrowseOutputDir"
-                                Content="选择目录"
-                                Width="110"
-                                Height="44"
-                                Style="{StaticResource SecondaryButton}"
-                                Click="BtnBrowseOutputDir_Click"/>
-                    </Grid>
-
-                    <!-- 文件名模板 -->
-                    <TextBlock Text="文件名模板"
-                               FontSize="13"
-                               Foreground="#5C635D"
-                               Margin="0,0,0,6"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="130"/>
-                            <ColumnDefinition Width="110"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBox x:Name="TxtFileNameTemplate"
-                                 Grid.Column="0"
-                                 Height="44"
-                                 FontSize="14"
-                                 IsReadOnly="True"
-                                 Background="#F7F4EF"
-                                 BorderBrush="#E7E1D7"
-                                 BorderThickness="1.5"
-                                 VerticalContentAlignment="Center"
-                                 Margin="0,0,8,0"
-                                 Text="文档-{{序号}}.docx"/>
-
-                        <ComboBox x:Name="CmbInsertVariable"
-                                  Grid.Column="1"
-                                  Height="44"
-                                  FontSize="13"
-                                  Padding="10,0"
-                                  Background="White"
-                                  BorderBrush="#E7E1D7"
-                                  BorderThickness="1.5"
-                                  VerticalContentAlignment="Center"
-                                  Margin="0,0,8,0"
-                                  SelectionChanged="CmbInsertVariable_SelectionChanged"/>
-
-                        <Button Grid.Column="2"
-                                x:Name="BtnFileNameHelp"
-                                Content="清空"
-                                ToolTip="重置文件名模板为默认序号"
-                                Width="110"
-                                Height="44"
-                                FontSize="13"
-                                Background="#F7F4EF"
-                                Foreground="#C4612F"
-                                BorderThickness="0"
-                                Click="BtnFileNameHelp_Click"
-                                Cursor="Hand"/>
-                    </Grid>
-                    <TextBlock FontSize="11"
-                               Foreground="#9CA39E"
-                               Margin="0,4,0,0"
-                               Text="文件名由选择的变量拼接而成，只允许从下拉框中选择变量，可点击清空重置"/>
-
-                    <!-- 子目录设置 -->
-                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                        <CheckBox x:Name="ChkSubfolder"
-                                  Content="以变量"
-                                  FontWeight="Bold"
-                                  Foreground="{StaticResource TextSecondaryBrush}"
-                                  VerticalContentAlignment="Center"
-                                  Checked="ChkSubfolder_Changed"
-                                  Unchecked="ChkSubfolder_Changed"/>
-                        <ComboBox x:Name="CmbSubfolderVar"
-                                  Width="120"
-                                  Height="28"
-                                  Margin="8,0,8,0"
-                                  VerticalContentAlignment="Center"
-                                  SelectionChanged="CmbSubfolderVar_SelectionChanged"/>
-                        <TextBlock Text="的值创建子目录"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   VerticalAlignment="Center"
-                                   FontSize="12"/>
                     </StackPanel>
-                </StackPanel>
-            </Border>
+                </Border>
 
-            <!-- ===== 进度条 ===== -->
-            <Border x:Name="PanelProgress"
-                    Background="White"
-                    BorderBrush="#E7E1D7"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="24"
-                    Margin="0,0,0,16"
-                    Visibility="Collapsed">
-                <StackPanel>
-                    <TextBlock Text="正在生成文档..."
-                               FontSize="14"
-                               FontWeight="SemiBold"
-                               Foreground="#1F2421"
-                               Margin="0,0,0,12"/>
-                    <ProgressBar x:Name="ProgressBar"
-                                 Height="10"
-                                 Foreground="#C4612F"
-                                 Background="#EBE7DE"
-                                 BorderThickness="0"
-                                 Margin="0,0,0,8"/>
-                    <TextBlock x:Name="TxtProgress"
-                               Text="准备中..."
-                               FontSize="13"
-                               Foreground="#5C635D"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
+                <!-- ===== 输出配置 (上下分层规整布局) ===== -->
+                <Border Background="White"
+                        BorderBrush="#E7E1D7"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="24"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12"
+                                          ShadowDepth="3"
+                                          Opacity="0.06"
+                                          Color="#000000"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="输出配置"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   Foreground="#1F2421"
+                                   Margin="0,0,0,20"/>
 
-            <!-- ===== 生成结果 ===== -->
-            <Border x:Name="PanelResults"
-                    Background="White"
-                    BorderBrush="#E7E1D7"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="24"
-                    Margin="0,0,0,16"
-                    Visibility="Collapsed">
-                <StackPanel>
-                    <TextBlock x:Name="TxtResultHeader"
-                               Text="生成完成"
-                               FontSize="14"
-                               FontWeight="SemiBold"
-                               Foreground="#1F2421"
-                               Margin="0,0,0,12"/>
-                    <ItemsControl x:Name="ResultItemsControl">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#F7F4EF"
-                                        BorderBrush="#EBE7DE"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="14"
-                                        Margin="0,0,0,8">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="13"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#1F2421">
-                                            <Run Text="📄 "/>
-                                            <Run Text="{Binding Mode=OneWay}"/>
-                                        </TextBlock>
-                                        <Button Grid.Column="1"
-                                                Content="查看文档"
-                                                Width="80"
-                                                Height="28"
-                                                Margin="0,0,8,0"
-                                                Style="{StaticResource SecondaryButton}"
-                                                Padding="0"
-                                                Click="BtnOpenResult_Click"
-                                                Tag="{Binding Mode=OneWay}"/>
-                                        <Button Grid.Column="2"
-                                                Content="定位"
-                                                Width="60"
-                                                Height="28"
-                                                Style="{StaticResource SecondaryButton}"
-                                                Padding="0"
-                                                Click="BtnLocateResult_Click"
-                                                Tag="{Binding Mode=OneWay}"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
+                        <!-- 第一层：输出目录配置 -->
+                        <StackPanel Margin="0,0,0,0">
+                            <TextBlock Text="输出路径"
+                                       FontSize="13.5"
+                                       FontWeight="SemiBold"
+                                       Foreground="#1F2421"
+                                       Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtOutputDir"
+                                         Grid.Column="0"
+                                         Height="40"
+                                         FontSize="13.5"
+                                         IsReadOnly="True"
+                                         Background="#F7F4EF"
+                                         BorderBrush="#E7E1D7"
+                                         BorderThickness="1.5"
+                                         VerticalContentAlignment="Center"
+                                         Tag="请选择生成的 Word 文档输出保存目录..."/>
+                                <Button Grid.Column="2"
+                                        x:Name="BtnBrowseOutputDir"
+                                        Content="选择目录"
+                                        Width="100"
+                                        Height="40"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="0"
+                                        Click="BtnBrowseOutputDir_Click"/>
+                            </Grid>
 
-            <!-- ===== 生成按钮 ===== -->
-            <Button x:Name="BtnGenerate"
-                    Content="🚀 开始批量生成"
-                    Width="250"
-                    Height="56"
-                    FontSize="18"
-                    FontWeight="Bold"
-                    Foreground="White"
-                    Background="{StaticResource SageGreenBrush}"
-                    Cursor="Hand"
-                    HorizontalAlignment="Center"
-                    Click="BtnGenerate_Click"
-                    Margin="0,10,0,0"
-                    RenderTransformOrigin="0.5,0.5">
-                <Button.RenderTransform>
-                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                </Button.RenderTransform>
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Grid x:Name="BtnGrid">
-                            <!-- Base Border with Shadow -->
-                            <Border x:Name="BaseBorder" Background="{TemplateBinding Background}" CornerRadius="12">
-                                <Border.Effect>
-                                    <DropShadowEffect x:Name="BtnShadow" BlurRadius="12" ShadowDepth="2" Opacity="0.08" Color="#000000"/>
-                                </Border.Effect>
-                            </Border>
-                            <!-- Hover Border Overlay -->
-                            <Border x:Name="HoverBorder" Background="{StaticResource SageGreenHoverBrush}" CornerRadius="12" Opacity="0"/>
-                            <!-- Pressed Border Overlay -->
-                            <Border x:Name="PressedBorder" Background="#385846" CornerRadius="12" Opacity="0"/>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="HoverBorder"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="1" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                             To="1.03" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                             To="1.03" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                             Storyboard.TargetProperty="BlurRadius"
-                                                             To="18" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0.16" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetName="HoverBorder"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                             To="1" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                             To="1" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                             Storyboard.TargetProperty="BlurRadius"
-                                                             To="12" Duration="0:0:0.15"/>
-                                            <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0.08" Duration="0:0:0.15"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                             To="0.96" Duration="0:0:0.08"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                             To="0.96" Duration="0:0:0.08"/>
-                                            <DoubleAnimation Storyboard.TargetName="PressedBorder"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="1" Duration="0:0:0.08"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                             To="1.03" Duration="0:0:0.08"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                             To="1.03" Duration="0:0:0.08"/>
-                                            <DoubleAnimation Storyboard.TargetName="PressedBorder"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             To="0" Duration="0:0:0.08"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.5"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+                            <!-- 子目录按变量分类 -->
+                            <CheckBox x:Name="ChkSubfolder"
+                                      Content="创建单独的目录"
+                                      FontWeight="SemiBold"
+                                      Foreground="{StaticResource TextSecondaryBrush}"
+                                      VerticalContentAlignment="Center"
+                                      Checked="ChkSubfolder_Changed"
+                                      Unchecked="ChkSubfolder_Changed"/>
+                            
+                            <!-- 缩进的分类变量选择，支持多级变量和光标插入 -->
+                            <StackPanel x:Name="GridSubfolderVar" 
+                                        Margin="24,10,0,0" 
+                                        Visibility="Collapsed">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="TxtSubfolderRule"
+                                             Grid.Column="0"
+                                             Height="40"
+                                             FontSize="13.5"
+                                             IsReadOnly="False"
+                                             VerticalContentAlignment="Center"
+                                             TextChanged="TxtSubfolderRule_TextChanged"
+                                             Tag="请输入或从右侧插入分类变量建立子目录，例如：{{客户}}"/>
+                                    <ComboBox x:Name="CmbSubfolderVar"
+                                              Grid.Column="2"
+                                              Width="140"
+                                              Height="40"
+                                              MinHeight="0"
+                                              Padding="10,0,24,0"
+                                              VerticalContentAlignment="Center"
+                                              SelectionChanged="CmbSubfolderVar_SelectionChanged"/>
+                                </Grid>
+                                <!-- 实时路径预览小字 -->
+                                <TextBlock x:Name="TxtSubfolderPreview"
+                                           FontSize="12"
+                                           Foreground="#8A8070"
+                                           Margin="0,6,0,0"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </StackPanel>
 
-        </StackPanel>
-    </ScrollViewer>
+                        <!-- 分割线 -->
+                        <Border BorderBrush="#EBE7DE" BorderThickness="0,0,0,1" Margin="0,20,0,20"/>
+
+                        <!-- 第二层：文件名命名规则 -->
+                        <StackPanel>
+                            <TextBlock Text="自动创建文件名"
+                                       FontSize="13.5"
+                                       FontWeight="SemiBold"
+                                       Foreground="#1F2421"
+                                       Margin="0,0,0,8"/>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtFileNameTemplate"
+                                         Grid.Column="0"
+                                         Height="40"
+                                         FontSize="13.5"
+                                         IsReadOnly="False"
+                                         Background="White"
+                                         BorderBrush="#E7E1D7"
+                                         BorderThickness="1.5"
+                                         VerticalContentAlignment="Center"
+                                         TextChanged="TxtFileNameTemplate_TextChanged"
+                                         Text="文档-{{序号}}.docx"/>
+                                <ComboBox x:Name="CmbInsertVariable"
+                                          Grid.Column="2"
+                                          Height="40"
+                                          Width="140"
+                                          FontSize="13"
+                                          Padding="10,0"
+                                          Background="White"
+                                          BorderBrush="#E7E1D7"
+                                          BorderThickness="1.5"
+                                          VerticalContentAlignment="Center"
+                                          SelectionChanged="CmbInsertVariable_SelectionChanged"/>
+                                <Button Grid.Column="4"
+                                        x:Name="BtnFileNameHelp"
+                                        Content="重置"
+                                        ToolTip="重置文件名模板为默认"
+                                        Width="80"
+                                        Height="40"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="0"
+                                        Click="BtnFileNameHelp_Click"/>
+                            </Grid>
+                            <TextBlock FontSize="12"
+                                       Foreground="#8A8070"
+                                       TextWrapping="Wrap"
+                                       Text="💡 文件名将由所选变量的值动态生成，支持手动修改或从右侧插入变量。默认使用“序号”。"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- ===== 进度条 ===== -->
+                <Border x:Name="PanelProgress"
+                        Background="White"
+                        BorderBrush="#E7E1D7"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="24"
+                        Margin="0,0,0,16"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="正在生成文档..."
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2421"
+                                   Margin="0,0,0,12"/>
+                        <ProgressBar x:Name="ProgressBar"
+                                     Height="10"
+                                     Foreground="#C4612F"
+                                     Background="#EBE7DE"
+                                     BorderThickness="0"
+                                     Margin="0,0,0,8"/>
+                        <TextBlock x:Name="TxtProgress"
+                                   Text="准备中..."
+                                   FontSize="13"
+                                   Foreground="#5C635D"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ===== 生成结果 ===== -->
+                <Border x:Name="PanelResults"
+                        Background="White"
+                        BorderBrush="#E7E1D7"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="24"
+                        Margin="0,0,0,16"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock x:Name="TxtResultHeader"
+                                   Text="生成完成"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2421"
+                                   Margin="0,0,0,12"/>
+                        <ItemsControl x:Name="ResultItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#F7F4EF"
+                                            BorderBrush="#EBE7DE"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="14"
+                                            Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#1F2421">
+                                                <Run Text="📄 "/>
+                                                <Run Text="{Binding Mode=OneWay}"/>
+                                            </TextBlock>
+                                            <Button Grid.Column="1"
+                                                    Content="查看文档"
+                                                    Width="80"
+                                                    Height="28"
+                                                    Margin="0,0,8,0"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="0"
+                                                    Click="BtnOpenResult_Click"
+                                                    Tag="{Binding Mode=OneWay}"/>
+                                            <Button Grid.Column="2"
+                                                    Content="定位"
+                                                    Width="60"
+                                                    Height="28"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="0"
+                                                    Click="BtnLocateResult_Click"
+                                                    Tag="{Binding Mode=OneWay}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- 合并与打印操作栏 -->
+                        <Border BorderBrush="#EBE7DE" BorderThickness="0,1,0,0" Margin="0,16,0,0" Padding="0,16,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" 
+                                           Text="💡 您可以将生成的多个 Word 文档合并为一个文档，方便整体排版、阅览或转为 PDF 打印。"
+                                           FontSize="12"
+                                           Foreground="#8A8070"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"/>
+                                
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button x:Name="BtnMergeWord"
+                                            Content="合并为单个 Word"
+                                            Width="140"
+                                            Height="38"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Margin="0,0,12,0"
+                                            Padding="0"
+                                            Click="BtnMergeWord_Click"/>
+                                    <Button x:Name="BtnMergePdf"
+                                            Content="合并为单个 PDF"
+                                            Width="140"
+                                            Height="38"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Padding="0"
+                                            Click="BtnMergePdf_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- 合并结果展示 -->
+                        <ItemsControl x:Name="MergedResultsItemsControl" Margin="0,16,0,0" Visibility="Collapsed">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFFBF8"
+                                            BorderBrush="#F7EBE1"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="14"
+                                            Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="13.5"
+                                                       FontWeight="Bold"
+                                                       Foreground="#C4612F">
+                                                <Run Text="🔗 合并结果："/>
+                                                <Run Text="{Binding DisplayName, Mode=OneWay}"/>
+                                            </TextBlock>
+                                            <Button Grid.Column="1"
+                                                    Content="查看文档"
+                                                    Width="80"
+                                                    Height="28"
+                                                    Margin="0,0,8,0"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="0"
+                                                    Click="BtnOpenMergedResult_Click"
+                                                    Tag="{Binding FullPath, Mode=OneWay}"/>
+                                            <Button Grid.Column="2"
+                                                    Content="定位"
+                                                    Width="60"
+                                                    Height="28"
+                                                    Margin="0,0,8,0"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="0"
+                                                    Click="BtnLocateMergedResult_Click"
+                                                    Tag="{Binding FullPath, Mode=OneWay}"/>
+                                            <Button Grid.Column="3"
+                                                    Content="打印"
+                                                    Width="60"
+                                                    Height="28"
+                                                    Style="{StaticResource PrimaryButton}"
+                                                    Padding="0"
+                                                    Click="BtnPrintMergedResult_Click"
+                                                    Tag="{Binding FullPath, Mode=OneWay}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </Page>

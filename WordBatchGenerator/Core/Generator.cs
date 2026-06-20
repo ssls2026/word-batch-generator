@@ -40,9 +40,13 @@ public class Generator
                 var fileName = ReplaceVariables(fileNameTemplate, data);
                 
                 var targetOutputDir = outputDir;
-                if (!string.IsNullOrEmpty(subfolderVar) && data.TryGetValue(subfolderVar, out var subDirValue) && !string.IsNullOrEmpty(subDirValue))
+                if (!string.IsNullOrEmpty(subfolderVar))
                 {
-                    targetOutputDir = Path.Combine(outputDir, SanitizeFileName(subDirValue));
+                    var subfolder = ResolveSubfolder(subfolderVar, data);
+                    if (!string.IsNullOrEmpty(subfolder))
+                    {
+                        targetOutputDir = Path.Combine(outputDir, subfolder);
+                    }
                 }
 
                 if (!Directory.Exists(targetOutputDir))
@@ -145,5 +149,227 @@ public class Generator
         }
 
         return missingVariables;
+    }
+
+    /// <summary>
+    /// 合并多个 Word 文档为一个文档
+    /// </summary>
+    public static void MergeWordFiles(List<string> sourceFiles, string destPath)
+    {
+        if (sourceFiles == null || sourceFiles.Count == 0) return;
+
+        // 1. 复制第一个文件作为基础文件
+        File.Copy(sourceFiles[0], destPath, true);
+
+        // 2. 依次追加其它文件内容
+        using var destDoc = WordprocessingDocument.Open(destPath, true);
+        var mainPart = destDoc.MainDocumentPart;
+        if (mainPart == null) return;
+
+        var body = mainPart.Document.Body;
+        if (body == null) return;
+
+        int chunkId = 1;
+        // 从第二个文件开始合并
+        for (int i = 1; i < sourceFiles.Count; i++)
+        {
+            var srcFile = sourceFiles[i];
+            if (!File.Exists(srcFile)) continue;
+
+            // 添加分页符
+            body.AppendChild(new Paragraph(new Run(new Break { Type = BreakValues.Page })));
+
+            string altChunkId = $"AltChunkId{chunkId++}";
+            var chunkPart = mainPart.AddAlternativeFormatImportPart(
+                AlternativeFormatImportPartType.WordprocessingML, 
+                altChunkId
+            );
+
+            using (var fileStream = File.OpenRead(srcFile))
+            {
+                chunkPart.FeedData(fileStream);
+            }
+
+            var altChunk = new AltChunk { Id = altChunkId };
+            body.AppendChild(altChunk);
+        }
+
+        destDoc.Save();
+    }
+
+    /// <summary>
+    /// 将 Word 文档使用本地 Word 软件转换为 PDF 并保存
+    /// </summary>
+    public static bool ConvertDocxToPdfDynamic(string docxPath, string pdfPath)
+    {
+        Type? wordType = Type.GetTypeFromProgID("Word.Application");
+        if (wordType == null) return false;
+
+        object? wordApp = null;
+        object? doc = null;
+        try
+        {
+            wordApp = Activator.CreateInstance(wordType);
+            if (wordApp == null) return false;
+
+            // wordApp.Visible = false
+            wordType.InvokeMember("Visible", System.Reflection.BindingFlags.SetProperty, null, wordApp, new object[] { false });
+
+            // object docs = wordApp.Documents
+            object? docs = wordType.InvokeMember("Documents", System.Reflection.BindingFlags.GetProperty, null, wordApp, null);
+            if (docs == null) return false;
+
+            // object doc = docs.Open(docxPath)
+            doc = docs.GetType().InvokeMember("Open", System.Reflection.BindingFlags.InvokeMethod, null, docs, new object[] { docxPath });
+            if (doc == null) return false;
+
+            // wdExportFormatPDF = 17
+            // doc.ExportAsFixedFormat(pdfPath, 17)
+            doc.GetType().InvokeMember("ExportAsFixedFormat", System.Reflection.BindingFlags.InvokeMethod, null, doc, new object[] { pdfPath, 17 });
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Word 转 PDF 失败: {ex.Message}");
+            return false;
+        }
+        finally
+        {
+            if (doc != null)
+            {
+                try
+                {
+                    doc.GetType().InvokeMember("Close", System.Reflection.BindingFlags.InvokeMethod, null, doc, new object[] { 0 /* wdDoNotSaveChanges = 0 */ });
+                }
+                catch { }
+            }
+            if (wordApp != null)
+            {
+                try
+                {
+                    wordType.InvokeMember("Quit", System.Reflection.BindingFlags.InvokeMethod, null, wordApp, null);
+                }
+                catch { }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 解析并动态生成子目录路径，支持多级规则 (如：{{年份}}/{{客户}})
+    /// </summary>
+    public static string ResolveSubfolder(string subfolderRule, Dictionary<string, string> data)
+    {
+        if (string.IsNullOrEmpty(subfolderRule)) return string.Empty;
+
+        string rule = subfolderRule;
+        // 兼容老版本：如果不含双花括号，说明是单一变量名称，自动包装为新格式
+        if (!rule.Contains("{{") && !rule.Contains("}}"))
+        {
+            rule = "{{" + rule + "}}";
+        }
+
+        // 替换所有变量占位符
+        string resolved = ReplaceVariables(rule, data);
+
+        // 清理非法字符并拼接
+        return SanitizeSubfolderPath(resolved);
+    }
+
+    /// <summary>
+    /// 替换子目录中非法的字符，并保持路径层级（/ 或 \）
+    /// </summary>
+    public static string SanitizeSubfolderPath(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return string.Empty;
+
+        var parts = path.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+        var sanitizedParts = parts.Select(p => {
+            // 对每个目录段进行文件名合法性清理
+            var clean = SanitizeFileName(p);
+            // 去除可能产生的扩展名（如果是子目录的话）
+            if (clean.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
+            {
+                clean = clean.Substring(0, clean.Length - 5);
+            }
+            return clean.Trim();
+        });
+
+        return string.Join(Path.DirectorySeparatorChar.ToString(), sanitizedParts);
+    }
+
+    /// <summary>
+    /// 打印指定文档，对于 docx 使用 Word COM，对于其他或回退使用 Windows Shell 打印
+    /// </summary>
+    public static void PrintDocument(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("待打印的文件不存在", filePath);
+
+        string ext = Path.GetExtension(filePath).ToLower();
+        if (ext == ".docx")
+        {
+            Type? wordType = Type.GetTypeFromProgID("Word.Application");
+            if (wordType != null)
+            {
+                object? wordApp = null;
+                object? doc = null;
+                try
+                {
+                    wordApp = Activator.CreateInstance(wordType);
+                    if (wordApp != null)
+                    {
+                        wordType.InvokeMember("Visible", System.Reflection.BindingFlags.SetProperty, null, wordApp, new object[] { false });
+                        object? docs = wordType.InvokeMember("Documents", System.Reflection.BindingFlags.GetProperty, null, wordApp, null);
+                        if (docs != null)
+                        {
+                            doc = docs.GetType().InvokeMember("Open", System.Reflection.BindingFlags.InvokeMethod, null, docs, new object[] { filePath });
+                            if (doc != null)
+                            {
+                                doc.GetType().InvokeMember("PrintOut", System.Reflection.BindingFlags.InvokeMethod, null, doc, null);
+                                return;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Word COM 打印失败，将回退到 Shell: {ex.Message}");
+                }
+                finally
+                {
+                    if (doc != null)
+                    {
+                        try
+                        {
+                            doc.GetType().InvokeMember("Close", System.Reflection.BindingFlags.InvokeMethod, null, doc, new object[] { 0 /* wdDoNotSaveChanges = 0 */ });
+                        }
+                        catch { }
+                    }
+                    if (wordApp != null)
+                    {
+                        try
+                        {
+                            wordType.InvokeMember("Quit", System.Reflection.BindingFlags.InvokeMethod, null, wordApp, null);
+                        }
+                        catch { }
+                    }
+                }
+            }
+        }
+
+        // 回退逻辑 / PDF 打印逻辑：直接调用系统的 print 动词发送到默认打印机
+        System.Diagnostics.ProcessStartInfo info = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = filePath,
+            Verb = "print",
+            UseShellExecute = true,
+            CreateNoWindow = true,
+            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+        };
+        using (var p = System.Diagnostics.Process.Start(info))
+        {
+            p?.WaitForExit(3000);
+        }
     }
 }

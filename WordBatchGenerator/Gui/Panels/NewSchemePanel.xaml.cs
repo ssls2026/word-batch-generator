@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -61,11 +62,69 @@ public partial class NewSchemePanel : Page
             WordPreview.CoreWebView2.Settings.IsScriptEnabled = true;
             WordPreview.NavigationCompleted += WordPreview_NavigationCompleted;
             WordPreview.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+
+            if (string.IsNullOrEmpty(_currentTemplatePath))
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    WordPreview.NavigateToString(GetWelcomeHtml());
+                });
+            }
         }
         catch (Exception)
         {
             // WebView2 runtime 未安装时降级到纯文本显示
         }
+    }
+
+    private string GetWelcomeHtml()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("<!DOCTYPE html>");
+        sb.AppendLine("<html><head><meta charset='utf-8'>");
+        sb.AppendLine("<style>");
+        sb.AppendLine("body { font-family: 'Microsoft YaHei', sans-serif; background-color: #F7F4EF; color: #1F2421; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }");
+        sb.AppendLine("#paper-container { background-color: #ffffff; width: 100%; max-width: 680px; min-height: 480px; padding: 30px; box-sizing: border-box; border-radius: 12px; border: 1px dashed #D4CEC2; box-shadow: 0 4px 20px rgba(0,0,0,0.03); text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }");
+        sb.AppendLine(".icon { font-size: 48px; margin-bottom: 16px; }");
+        sb.AppendLine("h2 { margin: 0 0 8px 0; font-size: 20px; font-weight: bold; color: #C4612F; }");
+        sb.AppendLine("p.subtitle { margin: 0 0 24px 0; font-size: 13px; color: #5C635D; max-width: 440px; line-height: 1.5; }");
+        sb.AppendLine(".steps-container { display: flex; justify-content: space-between; align-items: stretch; width: 100%; max-width: 560px; margin-bottom: 24px; gap: 12px; }");
+        sb.AppendLine(".step-card { flex: 1; background: #FBF9F5; border: 1px solid #EBE7DE; border-radius: 8px; padding: 16px 10px; display: flex; flex-direction: column; align-items: center; }");
+        sb.AppendLine(".step-num { width: 20px; height: 20px; border-radius: 10px; background: #C4612F; color: #ffffff; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; margin-bottom: 8px; }");
+        sb.AppendLine(".step-title { font-size: 12px; font-weight: bold; color: #1F2421; margin-bottom: 4px; }");
+        sb.AppendLine(".step-desc { font-size: 11px; color: #5C635D; line-height: 1.4; }");
+        sb.AppendLine(".preview-mock { border: 1px solid #EBE7DE; border-radius: 6px; padding: 10px 14px; width: 100%; max-width: 440px; background: #FAFAFA; text-align: left; font-size: 12px; line-height: 1.6; color: #5C635D; box-sizing: border-box; }");
+        sb.AppendLine(".variable { font-weight: bold; color: #4E7A8A; background-color: #F0F5F7; border: 1px solid #C5D6DC; border-radius: 4px; padding: 1px 3px; }");
+        sb.AppendLine("</style>");
+        sb.AppendLine("</head><body>");
+        sb.AppendLine("<div id='paper-container'>");
+        sb.AppendLine("  <div class='icon'>📄</div>");
+        sb.AppendLine("  <h2>Word 模板解析与实时标注</h2>");
+        sb.AppendLine("  <p class='subtitle'>导入您的 Word 模板文档（.docx），在这里即可直接预览文档内容并划选文字定义变量，帮助您快速建立批量生成方案。</p>");
+        sb.AppendLine("  <div class='steps-container'>");
+        sb.AppendLine("    <div class='step-card'>");
+        sb.AppendLine("      <div class='step-num'>1</div>");
+        sb.AppendLine("      <div class='step-title'>导入 Word 模板</div>");
+        sb.AppendLine("      <div class='step-desc'>点击上方“导入模板”按钮，载入您的文档。</div>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("    <div class='step-card'>");
+        sb.AppendLine("      <div class='step-num'>2</div>");
+        sb.AppendLine("      <div class='step-title'>划选文档内容</div>");
+        sb.AppendLine("      <div class='step-desc'>用鼠标在预览区直接选中需要被替换的文字。</div>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("    <div class='step-card'>");
+        sb.AppendLine("      <div class='step-num'>3</div>");
+        sb.AppendLine("      <div class='step-title'>标注为变量</div>");
+        sb.AppendLine("      <div class='step-desc'>在右侧输入变量名并点击“标注”，即可完成绑定。</div>");
+        sb.AppendLine("    </div>");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("  <div class='preview-mock'>");
+        sb.AppendLine("    <strong>预览效果演示：</strong><br/>");
+        sb.AppendLine("    尊敬的 <span class='variable'>{{客户姓名}}</span> 客户，您好！您的订单号为 <span class='variable'>{{订单编号}}</span>。");
+        sb.AppendLine("  </div>");
+        sb.AppendLine("</div>");
+        sb.AppendLine("</body></html>");
+        return sb.ToString();
     }
 
     /// <summary>
@@ -81,7 +140,9 @@ public partial class NewSchemePanel : Page
             {
                 Dispatcher.Invoke(() =>
                 {
-                    TxtSelectionText.Text = $"当前选中: \"{_lastSelection.text}\"";
+                    TxtSelectionText.Text = $"已选中: \"{_lastSelection.text}\"";
+                    TxtSelectionText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["PrimaryBrush"];
+                    TxtSelectionText.FontWeight = FontWeights.Bold;
                 });
             }
         }
@@ -244,7 +305,7 @@ public partial class NewSchemePanel : Page
             {
                 _variables.Add(variableName);
                 UpdateVariableNameComboBox();
-                LstVariables.Items.Add($"• {variableName}");
+                LstVariables.Items.Add(variableName);
             }
             
             TxtVariableName.Text = string.Empty;
@@ -252,7 +313,9 @@ public partial class NewSchemePanel : Page
 
             // 重置选区
             _lastSelection = null;
-            TxtSelectionText.Text = "当前选中: 未选择文本";
+            TxtSelectionText.Text = "请在左侧预览区中划选变量文本";
+            TxtSelectionText.Foreground = new System.Windows.Media.SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#8A8070"));
+            TxtSelectionText.FontWeight = FontWeights.Medium;
 
             // 重新载入预览
             LoadPreview();
@@ -263,17 +326,21 @@ public partial class NewSchemePanel : Page
         }
     }
 
-    /// <summary>
-    /// 从列表移除变量
-    /// </summary>
-    private void BtnRemoveVariable_Click(object sender, RoutedEventArgs e)
+    private void BtnDeleteVariableItem_Click(object sender, RoutedEventArgs e)
     {
-        if (LstVariables.SelectedItem is string selected)
+        if (sender is Button btn && btn.DataContext is string varName)
         {
-            var name = selected.Replace("• ", "").Trim();
-            _variables.Remove(name);
+            RemoveVariable(varName);
+        }
+    }
+
+    private void RemoveVariable(string varName)
+    {
+        if (_variables.Contains(varName))
+        {
+            _variables.Remove(varName);
             UpdateVariableNameComboBox();
-            LstVariables.Items.Remove(selected);
+            LstVariables.Items.Remove(varName);
             UpdateVariableCount();
         }
     }
@@ -398,7 +465,7 @@ public partial class NewSchemePanel : Page
             foreach (var varName in scheme.Variables)
             {
                 _variables.Add(varName);
-                LstVariables.Items.Add($"• {varName}");
+                LstVariables.Items.Add(varName);
             }
 
             UpdateVariableNameComboBox();
@@ -424,10 +491,9 @@ public partial class NewSchemePanel : Page
         {
             if (dependencyObject is ListBoxItem item)
             {
-                var varText = item.Content as string;
-                if (varText != null)
+                var varName = item.Content as string;
+                if (varName != null)
                 {
-                    var varName = varText.Replace("• ", "").Trim();
                     NavigateToVariable(varName);
                 }
                 break;
@@ -440,9 +506,8 @@ public partial class NewSchemePanel : Page
     {
         if (e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.Down)
         {
-            if (LstVariables.SelectedItem is string selected)
+            if (LstVariables.SelectedItem is string varName)
             {
-                var varName = selected.Replace("• ", "").Trim();
                 if (varName != _lastClickedVariable)
                 {
                     NavigateToVariable(varName);

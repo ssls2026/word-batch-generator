@@ -57,7 +57,10 @@ public class SchemeManager
         if (!string.IsNullOrEmpty(scheme.TemplatePath) && File.Exists(scheme.TemplatePath))
         {
             var templateDestPath = Path.Combine(schemeDir, "template.docx");
-            File.Copy(scheme.TemplatePath, templateDestPath, true);
+            if (Path.GetFullPath(scheme.TemplatePath).ToLower() != Path.GetFullPath(templateDestPath).ToLower())
+            {
+                File.Copy(scheme.TemplatePath, templateDestPath, true);
+            }
             scheme.TemplatePath = templateDestPath;
         }
     }

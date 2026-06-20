@@ -199,14 +199,34 @@
                                    Foreground="#1F2421"
                                    Margin="0,0,0,8"/>
 
-                        <TextBlock x:Name="TxtSelectionText"
-                                   Text="当前选中: 未选择文本"
-                                   FontSize="12"
-                                   FontWeight="Bold"
-                                   Foreground="#C4612F"
-                                   TextWrapping="Wrap"
-                                   Margin="0,0,0,8"
-                                   MinHeight="36"/>
+                        <!-- Selection Feedback Card -->
+                        <Border x:Name="SelectionCard"
+                                Background="#FFFBF8"
+                                BorderBrush="#F3EBE5"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="12,10"
+                                Margin="0,0,0,12"
+                                MinHeight="56">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="💡" 
+                                           FontSize="15" 
+                                           VerticalAlignment="Center" 
+                                           Margin="0,0,8,0"/>
+                                <TextBlock x:Name="TxtSelectionText"
+                                           Grid.Column="1"
+                                           Text="请在左侧预览区中划选变量文本"
+                                           FontSize="12"
+                                           FontWeight="Medium"
+                                           Foreground="#8A8070"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
 
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
@@ -323,7 +343,6 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0"
@@ -335,20 +354,46 @@
 
                         <ListBox x:Name="LstVariables"
                                  Grid.Row="1"
-                                 Background="#F7F4EF"
-                                 BorderBrush="#E7E1D7"
-                                 BorderThickness="1"
-                                 Padding="4"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Padding="0"
                                  FontSize="13"
                                  SelectionMode="Single"
+                                 HorizontalContentAlignment="Stretch"
                                  PreviewMouseLeftButtonUp="LstVariables_PreviewMouseLeftButtonUp"
                                  KeyUp="LstVariables_KeyUp">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid HorizontalAlignment="Stretch" Height="28">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="🏷️" FontSize="12" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding}" VerticalAlignment="Center" Foreground="#1F2421"/>
+                                        <Button Grid.Column="2" 
+                                                Content="✕" 
+                                                Width="20" Height="20"
+                                                FontSize="9"
+                                                FontWeight="Bold"
+                                                Foreground="#9CA39E"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Cursor="Hand"
+                                                ToolTip="移除此变量"
+                                                Click="BtnDeleteVariableItem_Click"
+                                                Tag="{Binding}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
-                                    <Setter Property="Padding" Value="10,8"/>
-                                    <Setter Property="Margin" Value="0,0,0,3"/>
+                                    <Setter Property="Padding" Value="8,4"/>
+                                    <Setter Property="Margin" Value="0,0,0,4"/>
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListBoxItem">
@@ -357,16 +402,14 @@
                                                         BorderThickness="0"
                                                         CornerRadius="6"
                                                         Padding="{TemplateBinding Padding}">
-                                                    <ContentPresenter/>
+                                                    <ContentPresenter HorizontalAlignment="Stretch"/>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#FFF7F0"/>
-                                                        <Setter Property="Foreground" Value="#C4612F"/>
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#FFFBF8"/>
                                                     </Trigger>
                                                     <Trigger Property="IsSelected" Value="True">
                                                         <Setter TargetName="ItemBorder" Property="Background" Value="#F2E3D6"/>
-                                                        <Setter Property="Foreground" Value="#C4612F"/>
                                                         <Setter Property="FontWeight" Value="SemiBold"/>
                                                     </Trigger>
                                                 </ControlTemplate.Triggers>
@@ -376,15 +419,6 @@
                                 </Style>
                             </ListBox.ItemContainerStyle>
                         </ListBox>
-
-                        <Button Grid.Row="2"
-                                Content="移除选中变量"
-                                Style="{StaticResource DangerButton}"
-                                Height="34"
-                                FontSize="13"
-                                Click="BtnRemoveVariable_Click"
-                                Margin="0,8,0,0"
-                                Padding="0"/>
                     </Grid>
                 </Border>
 
