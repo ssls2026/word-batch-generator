@@ -43,28 +43,45 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="ButtonBorder"
-                                    Background="{TemplateBinding Background}"
-                                    CornerRadius="10"
-                                    Padding="{TemplateBinding Padding}">
-                                <Border.Effect>
-                                    <DropShadowEffect x:Name="ButtonShadow"
-                                                      BlurRadius="8"
-                                                      ShadowDepth="1.5"
-                                                      Opacity="0.08"
-                                                      Color="#000000"/>
-                                </Border.Effect>
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid x:Name="ButtonGrid">
+                                <!-- Base Background Border with Shadow -->
+                                <Border x:Name="BaseBorder"
+                                        Background="{TemplateBinding Background}"
+                                        CornerRadius="10">
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="ButtonShadow"
+                                                          BlurRadius="8"
+                                                          ShadowDepth="1.5"
+                                                          Opacity="0.08"
+                                                          Color="#000000"/>
+                                    </Border.Effect>
+                                </Border>
+                                <!-- Hover Overlay -->
+                                <Border x:Name="HoverBorder"
+                                        Background="#D97943"
+                                        CornerRadius="10"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                <!-- Pressed Overlay -->
+                                <Border x:Name="PressedBorder"
+                                        Background="#A94E22"
+                                        CornerRadius="10"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                <!-- Content Presenter on top of all borders -->
+                                <Border Padding="{TemplateBinding Padding}" Background="Transparent">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#D97943" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                                  To="-2" Duration="0:0:0.15">
                                                     <DoubleAnimation.EasingFunction>
@@ -83,9 +100,9 @@
                                     <Trigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#C4612F" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                                  To="0" Duration="0:0:0.15">
                                                     <DoubleAnimation.EasingFunction>
@@ -110,9 +127,9 @@
                                                                  To="0.96" Duration="0:0:0.08"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
                                                                  To="0.96" Duration="0:0:0.08"/>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#A94E22" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.08"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
@@ -123,6 +140,9 @@
                                                                  To="1" Duration="0:0:0.08"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
                                                                  To="1" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.08"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
@@ -160,30 +180,51 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="ButtonBorder"
-                                    Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="10"
-                                    Padding="{TemplateBinding Padding}">
-                                <Border.Effect>
-                                    <DropShadowEffect x:Name="ButtonShadow"
-                                                      BlurRadius="4"
-                                                      ShadowDepth="1"
-                                                      Opacity="0.04"
-                                                      Color="#000000"/>
-                                </Border.Effect>
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid x:Name="ButtonGrid">
+                                <!-- Base Border with Shadow -->
+                                <Border x:Name="BaseBorder"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="10">
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="ButtonShadow"
+                                                          BlurRadius="4"
+                                                          ShadowDepth="1"
+                                                          Opacity="0.04"
+                                                          Color="#000000"/>
+                                    </Border.Effect>
+                                </Border>
+                                <!-- Hover Border Overlay -->
+                                <Border x:Name="HoverBorder"
+                                        Background="#FFF7F0"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="10"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                <!-- Pressed Border Overlay -->
+                                <Border x:Name="PressedBorder"
+                                        Background="#FFEFE5"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="10"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                <!-- Content Presenter -->
+                                <Border Padding="{TemplateBinding Padding}" Background="Transparent">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#FFF7F0" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                                  To="-2" Duration="0:0:0.15">
                                                      <DoubleAnimation.EasingFunction>
@@ -202,9 +243,9 @@
                                     <Trigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="White" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                                  To="0" Duration="0:0:0.15">
                                                      <DoubleAnimation.EasingFunction>
@@ -229,6 +270,9 @@
                                                                  To="0.96" Duration="0:0:0.08"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
                                                                  To="0.96" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.08"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
@@ -239,6 +283,9 @@
                                                                  To="1" Duration="0:0:0.08"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
                                                                  To="1" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.08"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
@@ -258,7 +305,7 @@
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Foreground" Value="White"/>
-                <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+                <Setter Property="Background" Value="{StaticResource MutedRedBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Padding" Value="20,12"/>
@@ -275,28 +322,45 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="ButtonBorder"
-                                    Background="{TemplateBinding Background}"
-                                    CornerRadius="10"
-                                    Padding="{TemplateBinding Padding}">
-                                <Border.Effect>
-                                    <DropShadowEffect x:Name="ButtonShadow"
-                                                      BlurRadius="8"
-                                                      ShadowDepth="1.5"
-                                                      Opacity="0.08"
-                                                      Color="#000000"/>
-                                </Border.Effect>
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid x:Name="ButtonGrid">
+                                <!-- Base Background with Shadow -->
+                                <Border x:Name="BaseBorder"
+                                        Background="{TemplateBinding Background}"
+                                        CornerRadius="10">
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="ButtonShadow"
+                                                          BlurRadius="8"
+                                                          ShadowDepth="1.5"
+                                                          Opacity="0.08"
+                                                          Color="#000000"/>
+                                    </Border.Effect>
+                                </Border>
+                                <!-- Hover Overlay -->
+                                <Border x:Name="HoverBorder"
+                                        Background="{StaticResource MutedRedHoverBrush}"
+                                        CornerRadius="10"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                <!-- Pressed Overlay -->
+                                <Border x:Name="PressedBorder"
+                                        Background="#9E3D3D"
+                                        CornerRadius="10"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                <!-- Content Presenter -->
+                                <Border Padding="{TemplateBinding Padding}" Background="Transparent">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#E53935" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                                  To="-2" Duration="0:0:0.15">
                                                      <DoubleAnimation.EasingFunction>
@@ -315,9 +379,9 @@
                                     <Trigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#F44336" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"
                                                                  To="0" Duration="0:0:0.15">
                                                      <DoubleAnimation.EasingFunction>
@@ -342,9 +406,9 @@
                                                                  To="0.96" Duration="0:0:0.08"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
                                                                  To="0.96" Duration="0:0:0.08"/>
-                                                <ColorAnimation Storyboard.TargetName="ButtonBorder"
-                                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                To="#D32F2F" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.08"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
@@ -355,6 +419,9 @@
                                                                  To="1" Duration="0:0:0.08"/>
                                                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
                                                                  To="1" Duration="0:0:0.08"/>
+                                                <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.08"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
@@ -421,11 +488,21 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ToggleButton">
-                            <Border x:Name="Border"
-                                    Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="8">
+                            <Grid>
+                                <!-- Base Border -->
+                                <Border x:Name="Border"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="8"/>
+                                <!-- Hover Border Overlay -->
+                                <Border x:Name="HoverBorder"
+                                        Background="Transparent"
+                                        BorderBrush="#C4612F"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="8"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition />
@@ -447,10 +524,28 @@
                                         </Path.RenderTransform>
                                     </Path>
                                 </Grid>
-                            </Border>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="true">
                                     <Setter TargetName="Arrow" Property="Stroke" Value="#C4612F"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="true">
                                     <Setter TargetName="Arrow" Property="Stroke" Value="#C4612F"/>
@@ -459,6 +554,7 @@
                                             <RotateTransform Angle="180"/>
                                         </Setter.Value>
                                     </Setter>
+                                    <Setter TargetName="HoverBorder" Property="Opacity" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="false">
                                     <Setter TargetName="Arrow" Property="Stroke" Value="#9CA39E"/>
@@ -482,20 +578,39 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="TextBox">
-                            <Border x:Name="TextBoxBorder"
-                                    Background="{TemplateBinding Background}"
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="8"
-                                    Padding="{TemplateBinding Padding}">
-                                <Border.Effect>
-                                    <DropShadowEffect x:Name="TextBoxShadow"
-                                                      BlurRadius="0"
-                                                      ShadowDepth="0"
-                                                      Opacity="0"
-                                                      Color="#C4612F"/>
-                                </Border.Effect>
-                                <Grid>
+                            <Grid>
+                                <!-- Base Border -->
+                                <Border x:Name="BaseBorder"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="8">
+                                    <Border.Effect>
+                                        <DropShadowEffect x:Name="TextBoxShadow"
+                                                          BlurRadius="0"
+                                                          ShadowDepth="0"
+                                                          Opacity="0"
+                                                          Color="#C4612F"/>
+                                    </Border.Effect>
+                                </Border>
+                                <!-- Hover Border Overlay -->
+                                <Border x:Name="HoverBorder"
+                                        Background="Transparent"
+                                        BorderBrush="#D4CEC2"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="8"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                <!-- Focus Border Overlay -->
+                                <Border x:Name="FocusBorder"
+                                        Background="Transparent"
+                                        BorderBrush="#C4612F"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="8"
+                                        Opacity="0"
+                                        IsHitTestVisible="False"/>
+                                
+                                <Grid Margin="{TemplateBinding Padding}">
                                     <!-- Placeholder Text Block -->
                                     <TextBlock x:Name="PlaceholderText"
                                                Text="{TemplateBinding Tag}"
@@ -507,29 +622,29 @@
                                     <ScrollViewer x:Name="PART_ContentHost"
                                                   VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                                 </Grid>
-                            </Border>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <!-- Placeholder Trigger -->
                                 <Trigger Property="Text" Value="">
                                     <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible"/>
                                 </Trigger>
-                                <!-- Hover border color transition -->
+                                <!-- Hover border opacity transition -->
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="TextBoxBorder"
-                                                                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                                                To="#D4CEC2" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.15"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.EnterActions>
                                     <Trigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="TextBoxBorder"
-                                                                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                                                To="#E7E1D7" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.15"/>
                                             </Storyboard>
                                         </BeginStoryboard>
                                     </Trigger.ExitActions>
@@ -539,9 +654,9 @@
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="TextBoxBorder"
-                                                                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                                                To="#C4612F" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="FocusBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="1" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetName="TextBoxShadow"
                                                                  Storyboard.TargetProperty="Opacity"
                                                                  To="0.12" Duration="0:0:0.15"/>
@@ -554,9 +669,9 @@
                                     <Trigger.ExitActions>
                                         <BeginStoryboard>
                                             <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="TextBoxBorder"
-                                                                Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)"
-                                                                To="#E7E1D7" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="FocusBorder"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 To="0" Duration="0:0:0.15"/>
                                                 <DoubleAnimation Storyboard.TargetName="TextBoxShadow"
                                                                  Storyboard.TargetProperty="Opacity"
                                                                  To="0" Duration="0:0:0.15"/>
@@ -646,26 +761,6 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="HasItems" Value="false">
                                     <Setter TargetName="ToggleButton" Property="IsEnabled" Value="false"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ToggleButton"
-                                                                Storyboard.TargetProperty="(ToggleButton.BorderBrush).(SolidColorBrush.Color)"
-                                                                To="#C4612F" Duration="0:0:0.15"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="ToggleButton"
-                                                                Storyboard.TargetProperty="(ToggleButton.BorderBrush).(SolidColorBrush.Color)"
-                                                                To="#E7E1D7" Duration="0:0:0.15"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsDropDownOpen" Value="True">
                                     <Setter TargetName="ToggleButton" Property="BorderBrush" Value="#C4612F"/>

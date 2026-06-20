@@ -231,7 +231,7 @@
                                     FontSize="13"
                                     FontWeight="Bold"
                                     Foreground="White"
-                                    Background="#4CAF50"
+                                    Background="{StaticResource SageGreenBrush}"
                                     Cursor="Hand"
                                     Click="BtnAddVariable_Click"
                                     RenderTransformOrigin="0.5,0.5">
@@ -240,17 +240,20 @@
                                 </Button.RenderTransform>
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="BtnBorder" Background="{TemplateBinding Background}" CornerRadius="8">
+                                        <Grid>
+                                            <Border x:Name="BaseBorder" Background="{TemplateBinding Background}" CornerRadius="8"/>
+                                            <Border x:Name="HoverBorder" Background="{StaticResource SageGreenHoverBrush}" CornerRadius="8" Opacity="0"/>
+                                            <Border x:Name="PressedBorder" Background="#385846" CornerRadius="8" Opacity="0"/>
                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
+                                        </Grid>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Trigger.EnterActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
-                                                            <ColorAnimation Storyboard.TargetName="BtnBorder"
-                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                            To="#45A049" Duration="0:0:0.15"/>
+                                                            <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                             Storyboard.TargetProperty="Opacity"
+                                                                             To="1" Duration="0:0:0.15"/>
                                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
                                                                              To="1.03" Duration="0:0:0.15"/>
                                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
@@ -261,9 +264,9 @@
                                                 <Trigger.ExitActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
-                                                            <ColorAnimation Storyboard.TargetName="BtnBorder"
-                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                            To="#4CAF50" Duration="0:0:0.15"/>
+                                                            <DoubleAnimation Storyboard.TargetName="HoverBorder"
+                                                                             Storyboard.TargetProperty="Opacity"
+                                                                             To="0" Duration="0:0:0.15"/>
                                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
                                                                              To="1" Duration="0:0:0.15"/>
                                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
@@ -280,9 +283,9 @@
                                                                              To="0.96" Duration="0:0:0.08"/>
                                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
                                                                              To="0.96" Duration="0:0:0.08"/>
-                                                            <ColorAnimation Storyboard.TargetName="BtnBorder"
-                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                                            To="#388E3C" Duration="0:0:0.08"/>
+                                                            <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                             Storyboard.TargetProperty="Opacity"
+                                                                             To="1" Duration="0:0:0.08"/>
                                                         </Storyboard>
                                                     </BeginStoryboard>
                                                 </Trigger.EnterActions>
@@ -293,6 +296,9 @@
                                                                              To="1.03" Duration="0:0:0.08"/>
                                                             <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
                                                                              To="1.03" Duration="0:0:0.08"/>
+                                                            <DoubleAnimation Storyboard.TargetName="PressedBorder"
+                                                                             Storyboard.TargetProperty="Opacity"
+                                                                             To="0" Duration="0:0:0.08"/>
                                                         </Storyboard>
                                                     </BeginStoryboard>
                                                 </Trigger.ExitActions>

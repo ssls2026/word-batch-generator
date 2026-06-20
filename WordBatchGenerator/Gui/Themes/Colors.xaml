@@ -145,4 +145,31 @@
     <Color x:Key="PressedOverlayColor">#14000000</Color>
     <SolidColorBrush x:Key="PressedOverlayBrush" Color="{StaticResource PressedOverlayColor}"/>
 
+    <!-- ========================================
+         Curated Morandi Accent Colors
+         ======================================== -->
+    <!-- 黛青 / 蓝 (使用/浏览) -->
+    <Color x:Key="SlateBlueColor">#4E7A8A</Color>
+    <Color x:Key="SlateBlueHoverColor">#3D6473</Color>
+    <SolidColorBrush x:Key="SlateBlueBrush" Color="{StaticResource SlateBlueColor}"/>
+    <SolidColorBrush x:Key="SlateBlueHoverBrush" Color="{StaticResource SlateBlueHoverColor}"/>
+
+    <!-- 鼠尾绿 / 绿 (编辑/添加/生成) -->
+    <Color x:Key="SageGreenColor">#56876D</Color>
+    <Color x:Key="SageGreenHoverColor">#446D56</Color>
+    <SolidColorBrush x:Key="SageGreenBrush" Color="{StaticResource SageGreenColor}"/>
+    <SolidColorBrush x:Key="SageGreenHoverBrush" Color="{StaticResource SageGreenHoverColor}"/>
+
+    <!-- 陶泥金 / 橙黄 (导出) -->
+    <Color x:Key="WarmClayColor">#C68B59</Color>
+    <Color x:Key="WarmClayHoverColor">#B27947</Color>
+    <SolidColorBrush x:Key="WarmClayBrush" Color="{StaticResource WarmClayColor}"/>
+    <SolidColorBrush x:Key="WarmClayHoverBrush" Color="{StaticResource WarmClayHoverColor}"/>
+
+    <!-- 玫瑰红 / 红色 (删除/危险) -->
+    <Color x:Key="MutedRedColor">#C85C5C</Color>
+    <Color x:Key="MutedRedHoverColor">#B24747</Color>
+    <SolidColorBrush x:Key="MutedRedBrush" Color="{StaticResource MutedRedColor}"/>
+    <SolidColorBrush x:Key="MutedRedHoverBrush" Color="{StaticResource MutedRedHoverColor}"/>
+
 </ResourceDictionary>
