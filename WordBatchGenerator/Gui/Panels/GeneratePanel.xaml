@@ -149,25 +149,28 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left side: dropdown selection -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="选择方案"
+                        <!-- Left side: currently selected scheme display -->
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="当前使用方案"
                                        FontSize="14"
                                        FontWeight="SemiBold"
-                                       Foreground="#1F2421"
+                                       Foreground="#5C635D"
                                        Margin="0,0,0,8"/>
-                            <ComboBox x:Name="CmbSchemes"
-                                      Width="320"
-                                      HorizontalAlignment="Left"
-                                      Height="40"
-                                      FontSize="14"
-                                      Padding="10,0"
-                                      Background="White"
-                                      BorderBrush="#E7E1D7"
-                                      BorderThickness="1.5"
-                                      VerticalContentAlignment="Center"
-                                      IsEditable="False"
-                                      SelectionChanged="CmbSchemes_SelectionChanged"/>
+                            <Border Background="#F3EFE9"
+                                    BorderBrush="#E7E1D7"
+                                    BorderThickness="1.5"
+                                    CornerRadius="8"
+                                    Padding="16,10"
+                                    HorizontalAlignment="Left"
+                                    MinWidth="320">
+                                <TextBlock x:Name="TxtCurrentSchemeName"
+                                           Text="（未加载任何方案，请先在【方案管理】中选择使用）"
+                                           FontSize="14.5"
+                                           FontWeight="Bold"
+                                           Foreground="#1F2421"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"/>
+                            </Border>
                         </StackPanel>
 
                         <!-- Right side: start generation button -->

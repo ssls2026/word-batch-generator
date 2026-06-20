@@ -44,7 +44,17 @@ public partial class SchemeListPanel : Page
         if (sender is Button btn && btn.Tag is string schemeName)
         {
             SchemeManager.SaveLastScheme(schemeName);
-            NavigationService?.Navigate(new GeneratePanel(schemeName));
+            var mainWin = Application.Current.MainWindow as MainWindow;
+            if (mainWin != null)
+            {
+                var genPanel = new GeneratePanel(schemeName);
+                mainWin.BtnGenerate.Tag = genPanel;
+                mainWin.BtnGenerate.IsChecked = true;
+            }
+            else
+            {
+                NavigationService?.Navigate(new GeneratePanel(schemeName));
+            }
         }
     }
 
@@ -55,7 +65,17 @@ public partial class SchemeListPanel : Page
     {
         if (sender is Button btn && btn.Tag is string schemeName)
         {
-            NavigationService?.Navigate(new NewSchemePanel(schemeName));
+            var mainWin = Application.Current.MainWindow as MainWindow;
+            if (mainWin != null)
+            {
+                var newSchemePanel = new NewSchemePanel(schemeName);
+                mainWin.BtnNewScheme.Tag = newSchemePanel;
+                mainWin.BtnNewScheme.IsChecked = true;
+            }
+            else
+            {
+                NavigationService?.Navigate(new NewSchemePanel(schemeName));
+            }
         }
     }
 

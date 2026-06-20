@@ -26,25 +26,16 @@ public partial class GeneratePanel : Page
     public GeneratePanel()
     {
         InitializeComponent();
-        LoadSchemes();
         LoadLastScheme();
     }
 
     /// <summary>
     /// 带参数构造函数（从方案列表页跳转过来）
     /// </summary>
-    public GeneratePanel(string schemeName) : this()
+    public GeneratePanel(string schemeName)
     {
+        InitializeComponent();
         LoadScheme(schemeName);
-    }
-
-    /// <summary>
-    /// 加载方案名称到下拉框
-    /// </summary>
-    private void LoadSchemes()
-    {
-        var schemes = SchemeManager.GetAllSchemes();
-        CmbSchemes.ItemsSource = schemes.Select(s => s.Name).ToList();
     }
 
     /// <summary>
@@ -54,7 +45,14 @@ public partial class GeneratePanel : Page
     {
         var lastScheme = SchemeManager.GetLastScheme();
         if (!string.IsNullOrEmpty(lastScheme))
-            CmbSchemes.SelectedItem = lastScheme;
+        {
+            LoadScheme(lastScheme);
+        }
+        else
+        {
+            TxtCurrentSchemeName.Text = "（未加载任何方案，请先在【方案管理】中选择使用）";
+            BtnGenerate.IsEnabled = false;
+        }
     }
 
     /// <summary>
@@ -64,7 +62,7 @@ public partial class GeneratePanel : Page
     {
         _isInitializing = true;
         _currentScheme = SchemeManager.LoadScheme(schemeName);
-        CmbSchemes.SelectedItem = schemeName;
+        TxtCurrentSchemeName.Text = schemeName;
 
         if (_currentScheme != null)
         {
@@ -163,17 +161,7 @@ public partial class GeneratePanel : Page
         _isInitializing = false;
     }
 
-    /// <summary>
-    /// 方案下拉框选择变化
-    /// </summary>
-    private void CmbSchemes_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (CmbSchemes.SelectedItem is string schemeName)
-        {
-            LoadScheme(schemeName);
-            SchemeManager.SaveLastScheme(schemeName);
-        }
-    }
+
 
     /// <summary>
     /// 双页签切换事件
