@@ -121,169 +121,86 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- 页面标题 -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Text="批量生成文件"
-                       FontSize="22"
-                       FontWeight="Bold"
-                       Foreground="#1F2421"
-                       Margin="0,0,0,2"/>
-            <TextBlock Text="选择方案 → 导入数据 → 一键生成"
-                       FontSize="12.5"
-                       Foreground="#5C635D"/>
-        </StackPanel>
+        <!-- 页面固定头部栏 -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- 标题与当前方案标签 -->
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="批量生成文件"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="#1F2421"
+                               VerticalAlignment="Center"/>
+                    
+                    <!-- 当前方案徽章 -->
+                    <Border x:Name="BadgeCurrentScheme"
+                            Background="#F3EFE9"
+                            BorderBrush="#E7E1D7"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="8,4"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="方案: " FontSize="12.5" Foreground="#5C635D" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtCurrentSchemeName" Text="未选择" FontSize="12.5" FontWeight="Bold" Foreground="#1F2421" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <TextBlock Text="选择方案 → 导入数据 → 一键生成"
+                           FontSize="12.5"
+                           Foreground="#5C635D"/>
+            </StackPanel>
+            
+            <!-- 开始批量生成按钮 (置顶固定) -->
+            <Button Grid.Column="1"
+                    x:Name="BtnGenerate"
+                    Content="🚀 开始批量生成"
+                    Width="180"
+                    Height="38"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Foreground="White"
+                    Background="{StaticResource SageGreenBrush}"
+                    Cursor="Hand"
+                    VerticalAlignment="Center"
+                    Click="BtnGenerate_Click"
+                    RenderTransformOrigin="0.5,0.5">
+                <Button.RenderTransform>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Button.RenderTransform>
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.06" Color="#000000"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="hover" Background="{StaticResource SageGreenHoverBrush}" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="hover" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
 
         <!-- Scrollable Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12">
             <StackPanel Margin="0,0,12,0">
-                <!-- ===== 选择方案与开始生成 ===== -->
-                <Border Background="White"
-                        BorderBrush="#E7E1D7"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="20"
-                        Margin="0,0,0,16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Left side: currently selected scheme display -->
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="当前使用方案"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Foreground="#5C635D"
-                                       Margin="0,0,0,8"/>
-                            <Border Background="#F3EFE9"
-                                    BorderBrush="#E7E1D7"
-                                    BorderThickness="1.5"
-                                    CornerRadius="8"
-                                    Padding="16,10"
-                                    HorizontalAlignment="Left"
-                                    MinWidth="320">
-                                <TextBlock x:Name="TxtCurrentSchemeName"
-                                           Text="（未加载任何方案，请先在【方案管理】中选择使用）"
-                                           FontSize="14.5"
-                                           FontWeight="Bold"
-                                           Foreground="#1F2421"
-                                           TextWrapping="Wrap"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- Right side: start generation button -->
-                        <Button Grid.Column="1"
-                                x:Name="BtnGenerate"
-                                Content="🚀 开始批量生成"
-                                Width="240"
-                                Height="40"
-                                FontSize="14.5"
-                                FontWeight="Bold"
-                                Foreground="White"
-                                Background="{StaticResource SageGreenBrush}"
-                                Cursor="Hand"
-                                VerticalAlignment="Bottom"
-                                Click="BtnGenerate_Click"
-                                RenderTransformOrigin="0.5,0.5">
-                            <Button.RenderTransform>
-                                <ScaleTransform ScaleX="1" ScaleY="1"/>
-                            </Button.RenderTransform>
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Grid x:Name="BtnGrid">
-                                        <!-- Base Border with Shadow -->
-                                        <Border x:Name="BaseBorder" Background="{TemplateBinding Background}" CornerRadius="10">
-                                            <Border.Effect>
-                                                <DropShadowEffect x:Name="BtnShadow" BlurRadius="8" ShadowDepth="1.5" Opacity="0.08" Color="#000000"/>
-                                            </Border.Effect>
-                                        </Border>
-                                        <!-- Hover Border Overlay -->
-                                        <Border x:Name="HoverBorder" Background="{StaticResource SageGreenHoverBrush}" CornerRadius="10" Opacity="0"/>
-                                        <!-- Pressed Border Overlay -->
-                                        <Border x:Name="PressedBorder" Background="#385846" CornerRadius="10" Opacity="0"/>
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Trigger.EnterActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetName="HoverBorder"
-                                                                         Storyboard.TargetProperty="Opacity"
-                                                                         To="1" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                                         To="1.03" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                                         To="1.03" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                                         Storyboard.TargetProperty="BlurRadius"
-                                                                         To="14" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                                         Storyboard.TargetProperty="Opacity"
-                                                                         To="0.16" Duration="0:0:0.15"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </Trigger.EnterActions>
-                                            <Trigger.ExitActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetName="HoverBorder"
-                                                                         Storyboard.TargetProperty="Opacity"
-                                                                         To="0" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                                         To="1" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                                         To="1" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                                         Storyboard.TargetProperty="BlurRadius"
-                                                                         To="8" Duration="0:0:0.15"/>
-                                                        <DoubleAnimation Storyboard.TargetName="BtnShadow"
-                                                                         Storyboard.TargetProperty="Opacity"
-                                                                         To="0.08" Duration="0:0:0.15"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </Trigger.ExitActions>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed" Value="True">
-                                            <Trigger.EnterActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                                         To="0.96" Duration="0:0:0.08"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                                         To="0.96" Duration="0:0:0.08"/>
-                                                        <DoubleAnimation Storyboard.TargetName="PressedBorder"
-                                                                         Storyboard.TargetProperty="Opacity"
-                                                                         To="1" Duration="0:0:0.08"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </Trigger.EnterActions>
-                                            <Trigger.ExitActions>
-                                                <BeginStoryboard>
-                                                    <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                                                         To="1.03" Duration="0:0:0.08"/>
-                                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                                                         To="1.03" Duration="0:0:0.08"/>
-                                                        <DoubleAnimation Storyboard.TargetName="PressedBorder"
-                                                                         Storyboard.TargetProperty="Opacity"
-                                                                         To="0" Duration="0:0:0.08"/>
-                                                    </Storyboard>
-                                                </BeginStoryboard>
-                                            </Trigger.ExitActions>
-                                        </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="Opacity" Value="0.5"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </Grid>
-                </Border>
-
                 <!-- ===== 数据输入源双页签 ===== -->
                 <Border Background="White"
                         BorderBrush="#E7E1D7"
