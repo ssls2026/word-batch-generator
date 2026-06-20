@@ -36,7 +36,13 @@ public class Generator
         {
             try
             {
-                var data = dataList[i];
+                var originalData = dataList[i];
+                var data = new Dictionary<string, string>(originalData);
+                if (!data.ContainsKey("序号"))
+                {
+                    data["序号"] = (i + 1).ToString();
+                }
+
                 var fileName = ReplaceVariables(fileNameTemplate, data);
                 
                 var targetOutputDir = outputDir;

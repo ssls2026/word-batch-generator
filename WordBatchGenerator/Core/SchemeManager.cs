@@ -48,12 +48,7 @@ public class SchemeManager
             Directory.CreateDirectory(schemeDir);
         }
 
-        // 保存配置文件
-        var configPath = Path.Combine(schemeDir, "config.json");
-        var json = JsonSerializer.Serialize(scheme, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(configPath, json);
-
-        // 复制模板文件
+        // 复制模板文件并更新 TemplatePath
         if (!string.IsNullOrEmpty(scheme.TemplatePath) && File.Exists(scheme.TemplatePath))
         {
             var templateDestPath = Path.Combine(schemeDir, "template.docx");
@@ -63,6 +58,11 @@ public class SchemeManager
             }
             scheme.TemplatePath = templateDestPath;
         }
+
+        // 保存配置文件 (此时 TemplatePath 已经更新为正确的本地路径)
+        var configPath = Path.Combine(schemeDir, "config.json");
+        var json = JsonSerializer.Serialize(scheme, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(configPath, json);
     }
 
     /// <summary>

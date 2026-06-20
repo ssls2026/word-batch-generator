@@ -420,16 +420,30 @@ public partial class GeneratePanel : Page
             // 渲染生成结果
             var generatedFiles = new List<string>();
             _generatedFullPaths.Clear();
-            foreach (var data in _excelData)
+            for (int i = 0; i < _excelData.Count; i++)
             {
+                var originalData = _excelData[i];
+                var data = new Dictionary<string, string>(originalData);
+                if (!data.ContainsKey("序号"))
+                {
+                    data["序号"] = (i + 1).ToString();
+                }
+
                 var rawFileName = Generator.ReplaceVariables(fileNameTemplate, data);
                 var fileName = Generator.SanitizeFileName(rawFileName);
                 string relativePath = "";
 
-                if (!string.IsNullOrEmpty(subfolderVar) && data.TryGetValue(subfolderVar, out var subDirValue) && !string.IsNullOrEmpty(subDirValue))
+                if (!string.IsNullOrEmpty(subfolderVar))
                 {
-                    var subfolder = Generator.SanitizeFileName(subDirValue);
-                    relativePath = Path.Combine(subfolder, fileName);
+                    var subfolder = Generator.ResolveSubfolder(subfolderVar, data);
+                    if (!string.IsNullOrEmpty(subfolder))
+                    {
+                        relativePath = Path.Combine(subfolder, fileName);
+                    }
+                    else
+                    {
+                        relativePath = fileName;
+                    }
                 }
                 else
                 {
@@ -992,40 +1006,46 @@ public partial class GeneratePanel : Page
             return;
         }
 
-        var defaultName = $"合并文档_{_currentScheme?.Name ?? "未命名"}_{DateTime.Now:yyyyMMddHHmmss}.docx";
-        var dialog = new Microsoft.Win32.SaveFileDialog
+        var outputDir = TxtOutputDir.Text;
+        if (string.IsNullOrEmpty(outputDir) || !Directory.Exists(outputDir))
         {
-            Filter = "Word 文档 (*.docx)|*.docx",
-            FileName = defaultName,
-            Title = "合并为单个 Word 文档"
-        };
+            MessageBox.Show("输出目录不存在，请先选择合法的输出目录！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
-        if (dialog.ShowDialog() == true)
+        var fileName = $"合并文档_{_currentScheme?.Name ?? "未命名"}.docx";
+        var destPath = Path.Combine(outputDir, fileName);
+
+        try
         {
-            try
+            this.Cursor = System.Windows.Input.Cursors.Wait;
+            Generator.MergeWordFiles(_generatedFullPaths, destPath);
+            this.Cursor = System.Windows.Input.Cursors.Arrow;
+
+            MessageBox.Show("合并成功！已将合并后的文档列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // 检查列表中是否已经有这个路径，避免重复添加
+            var existing = _mergedFiles.FirstOrDefault(f => string.Equals(f.FullPath, destPath, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
             {
-                this.Cursor = System.Windows.Input.Cursors.Wait;
-                Generator.MergeWordFiles(_generatedFullPaths, dialog.FileName);
-                this.Cursor = System.Windows.Input.Cursors.Arrow;
-
-                MessageBox.Show("合并成功！已将合并后的文档列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                var mergedItem = new MergedFileItem
-                {
-                    DisplayName = Path.GetFileName(dialog.FileName),
-                    FullPath = dialog.FileName
-                };
-                _mergedFiles.Add(mergedItem);
-
-                MergedResultsItemsControl.ItemsSource = null;
-                MergedResultsItemsControl.ItemsSource = _mergedFiles;
-                MergedResultsItemsControl.Visibility = Visibility.Visible;
+                _mergedFiles.Remove(existing);
             }
-            catch (Exception ex)
+
+            var mergedItem = new MergedFileItem
             {
-                this.Cursor = System.Windows.Input.Cursors.Arrow;
-                MessageBox.Show($"合并 Word 文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                DisplayName = fileName,
+                FullPath = destPath
+            };
+            _mergedFiles.Add(mergedItem);
+
+            MergedResultsItemsControl.ItemsSource = null;
+            MergedResultsItemsControl.ItemsSource = _mergedFiles;
+            MergedResultsItemsControl.Visibility = Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            this.Cursor = System.Windows.Input.Cursors.Arrow;
+            MessageBox.Show($"合并 Word 文档失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -1045,65 +1065,71 @@ public partial class GeneratePanel : Page
             return;
         }
 
-        var defaultName = $"合并文档_{_currentScheme?.Name ?? "未命名"}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
-        var dialog = new Microsoft.Win32.SaveFileDialog
+        var outputDir = TxtOutputDir.Text;
+        if (string.IsNullOrEmpty(outputDir) || !Directory.Exists(outputDir))
         {
-            Filter = "PDF 文档 (*.pdf)|*.pdf",
-            FileName = defaultName,
-            Title = "合并并转换为单个 PDF 文档"
-        };
+            MessageBox.Show("输出目录不存在，请先选择合法的输出目录！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
-        if (dialog.ShowDialog() == true)
+        var fileName = $"合并文档_{_currentScheme?.Name ?? "未命名"}.pdf";
+        var destPath = Path.Combine(outputDir, fileName);
+        var tempDocx = Path.Combine(outputDir, $"~temp_merge_{Guid.NewGuid():N}.docx");
+
+        try
         {
-            var tempDocx = Path.Combine(Path.GetDirectoryName(dialog.FileName) ?? TxtOutputDir.Text, $"~temp_merge_{Guid.NewGuid():N}.docx");
-            try
+            this.Cursor = System.Windows.Input.Cursors.Wait;
+
+            // 1. 合并为临时 Word 文档
+            Generator.MergeWordFiles(_generatedFullPaths, tempDocx);
+
+            // 2. 转换为 PDF
+            bool convertSuccess = Generator.ConvertDocxToPdfDynamic(tempDocx, destPath);
+
+            this.Cursor = System.Windows.Input.Cursors.Arrow;
+
+            if (convertSuccess)
             {
-                this.Cursor = System.Windows.Input.Cursors.Wait;
+                MessageBox.Show("合并并转换为 PDF 成功！已将合并后的 PDF 文件列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // 1. 合并为临时 Word 文档
-                Generator.MergeWordFiles(_generatedFullPaths, tempDocx);
-
-                // 2. 转换为 PDF
-                bool convertSuccess = Generator.ConvertDocxToPdfDynamic(tempDocx, dialog.FileName);
-
-                this.Cursor = System.Windows.Input.Cursors.Arrow;
-
-                if (convertSuccess)
+                // 检查列表中是否已经有这个路径，避免重复添加
+                var existing = _mergedFiles.FirstOrDefault(f => string.Equals(f.FullPath, destPath, StringComparison.OrdinalIgnoreCase));
+                if (existing != null)
                 {
-                    MessageBox.Show("合并并转换为 PDF 成功！已将合并后的 PDF 文件列在下方合并结果列表中，您可以直接点击查看、定位或打印。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    var mergedItem = new MergedFileItem
-                    {
-                        DisplayName = Path.GetFileName(dialog.FileName),
-                        FullPath = dialog.FileName
-                    };
-                    _mergedFiles.Add(mergedItem);
-
-                    MergedResultsItemsControl.ItemsSource = null;
-                    MergedResultsItemsControl.ItemsSource = _mergedFiles;
-                    MergedResultsItemsControl.Visibility = Visibility.Visible;
+                    _mergedFiles.Remove(existing);
                 }
-                else
+
+                var mergedItem = new MergedFileItem
                 {
-                    MessageBox.Show("转换为 PDF 失败，请检查 Microsoft Word 运行状态。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                    DisplayName = fileName,
+                    FullPath = destPath
+                };
+                _mergedFiles.Add(mergedItem);
+
+                MergedResultsItemsControl.ItemsSource = null;
+                MergedResultsItemsControl.ItemsSource = _mergedFiles;
+                MergedResultsItemsControl.Visibility = Visibility.Visible;
             }
-            catch (Exception ex)
+            else
             {
-                this.Cursor = System.Windows.Input.Cursors.Arrow;
-                MessageBox.Show($"合并或转换 PDF 失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("转换为 PDF 失败，请检查 Microsoft Word 运行状态。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally
+        }
+        catch (Exception ex)
+        {
+            this.Cursor = System.Windows.Input.Cursors.Arrow;
+            MessageBox.Show($"合并或转换 PDF 失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            // 清理临时文件
+            if (File.Exists(tempDocx))
             {
-                // 清理临时文件
-                if (File.Exists(tempDocx))
+                try
                 {
-                    try
-                    {
-                        File.Delete(tempDocx);
-                    }
-                    catch { }
+                    File.Delete(tempDocx);
                 }
+                catch { }
             }
         }
     }
