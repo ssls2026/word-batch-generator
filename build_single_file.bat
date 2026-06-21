@@ -19,12 +19,16 @@ dotnet publish WordBatchGenerator\WordBatchGenerator.csproj -c Release -r win-x6
     -p:EnableCompressionInSingleFile=true
 
 echo.
+echo [4/4] 正在将单文件 EXE 复制到根目录...
+copy "WordBatchGenerator\bin\Release\net8.0-windows\win-x64\publish\Word批量生成器.exe" "Word批量生成器.exe" /y
+
+echo.
 echo ============================================================
 echo   ✅ 恭喜！单文件编译构建已完成！
 echo ============================================================
 echo.
-echo 单文件可执行程序输出路径:
-echo WordBatchGenerator\bin\Release\net8.0-windows\win-x64\publish\Word批量生成器.exe
+echo 根目录单文件可执行程序路径:
+echo Word批量生成器.exe
 echo.
 echo 构建信息说明:
 echo * 文件大小: 约 72 MB 左右 (已集成 .NET 8 离线环境与所有第三方依赖库)

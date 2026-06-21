@@ -14,3 +14,7 @@ obj/
 # System & OS Files
 .DS_Store
 Thumbs.db
+
+# Compiled single files
+Word批量生成器.exe
+Word批量生成器_带图标.exe
