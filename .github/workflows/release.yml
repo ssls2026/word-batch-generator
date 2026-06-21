@@ -31,10 +31,12 @@ jobs:
         dotnet publish -c Release WordBatchGenerator/WordBatchGenerator.csproj
       # Output will be generated in dist/ due to <PublishDir> in csproj config
 
+    - name: Install Inno Setup
+      run: choco install innosetup -y
+
     - name: Build Installer (Inno Setup)
-      uses: jetli/compile-inno-setup-action@v1
-      with:
-        filepath: 'installer/setup.iss'
+      run: iscc installer/setup.iss
+
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
