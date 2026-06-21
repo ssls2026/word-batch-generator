@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Word 批量生成器 v2.0"
-        Icon="Resources/app.png"
+        Icon="Resources/app.ico"
         Height="760" Width="1200"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
