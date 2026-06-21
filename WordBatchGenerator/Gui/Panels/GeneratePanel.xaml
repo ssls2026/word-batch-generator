@@ -588,6 +588,98 @@
                     </StackPanel>
                 </Border>
 
+                <!-- ===== 执行日志 ===== -->
+                <Border x:Name="PanelLogs"
+                        Background="White"
+                        BorderBrush="#E7E1D7"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20,16"
+                        Margin="0,0,0,12"
+                        Visibility="Collapsed">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12"
+                                          ShadowDepth="3"
+                                          Opacity="0.06"
+                                          Color="#000000"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                <TextBlock Text="📋" FontSize="15" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="执行日志" 
+                                           FontSize="13.5" 
+                                           FontWeight="Bold" 
+                                           Foreground="#1F2421"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                    x:Name="BtnClearLogs"
+                                    Content="清除日志"
+                                    FontSize="11.5"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Height="24"
+                                    Padding="8,0"
+                                    Click="BtnClearLogs_Click"/>
+                        </Grid>
+                        
+                        <Border BorderBrush="#EBE7DE" BorderThickness="1" CornerRadius="8" Background="#FDFCFB" Padding="10">
+                            <ListBox x:Name="LstLogs"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     MaxHeight="200"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                     HorizontalContentAlignment="Stretch">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- 时间 -->
+                                            <TextBlock Grid.Column="0" 
+                                                       Text="{Binding TimeString, Mode=OneWay}" 
+                                                       Foreground="#8A8070" 
+                                                       FontFamily="Consolas" 
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,10,0"/>
+                                            
+                                            <!-- 级别 -->
+                                            <Border Grid.Column="1" 
+                                                    CornerRadius="4" 
+                                                    Padding="6,2" 
+                                                    Margin="0,0,10,0"
+                                                    VerticalAlignment="Center"
+                                                    Background="{Binding LevelBgBrush, Mode=OneWay}">
+                                                <TextBlock Text="{Binding LevelString, Mode=OneWay}" 
+                                                           Foreground="{Binding LevelFgBrush, Mode=OneWay}" 
+                                                           FontSize="10" 
+                                                           FontWeight="Bold"
+                                                           HorizontalAlignment="Center"/>
+                                            </Border>
+                                            
+                                            <!-- 消息 -->
+                                            <TextBlock Grid.Column="2" 
+                                                       Text="{Binding Message, Mode=OneWay}" 
+                                                       Foreground="{Binding MessageBrush, Mode=OneWay}" 
+                                                       FontSize="12.5"
+                                                       VerticalAlignment="Center"
+                                                       TextWrapping="Wrap"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
                 <!-- ===== 生成结果 ===== -->
                 <Border x:Name="PanelResults"
                         Background="White"

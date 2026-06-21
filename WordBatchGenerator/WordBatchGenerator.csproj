@@ -10,7 +10,7 @@
     <Product>Word 批量生成器</Product>
     <Version>2.0.0</Version>
     <Authors>LZS</Authors>
-    <Description>Word 批量变量替换与授权生成工具 - C# 重构版</Description>
+    <Description>Word 批量变量替换与文档生成工具 - C# 重构版</Description>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
   </PropertyGroup>
 

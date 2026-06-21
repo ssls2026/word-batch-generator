@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Text;
@@ -728,6 +729,135 @@ public class WordParser
 
         sb.Append("</table>");
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// 规范化 Word 文档中的所有 Run（主要用于合并被切碎的占位符）
+    /// </summary>
+    public static void NormalizeDocumentRuns(string filePath)
+    {
+        using var doc = WordprocessingDocument.Open(filePath, true);
+        var mainPart = doc.MainDocumentPart;
+        if (mainPart == null) return;
+
+        // 1. 规范化正文
+        if (mainPart.Document?.Body != null)
+        {
+            NormalizeElementRuns(mainPart.Document.Body);
+        }
+
+        // 2. 规范化所有页眉
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header != null)
+            {
+                NormalizeElementRuns(headerPart.Header);
+            }
+        }
+
+        // 3. 规范化所有页脚
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer != null)
+            {
+                NormalizeElementRuns(footerPart.Footer);
+            }
+        }
+
+        doc.Save();
+    }
+
+    /// <summary>
+    /// 规范化容器元素下所有段落的 Run
+    /// </summary>
+    public static void NormalizeElementRuns(OpenXmlCompositeElement element)
+    {
+        foreach (var para in element.Descendants<Paragraph>())
+        {
+            NormalizeParagraphRuns(para);
+        }
+    }
+
+    /// <summary>
+    /// 合并段落中格式完全一致的相邻 Run，解决 OpenXml 中变量被切碎的问题
+    /// </summary>
+    public static void NormalizeParagraphRuns(Paragraph paragraph)
+    {
+        var runs = paragraph.Elements<Run>().ToList();
+        if (runs.Count <= 1) return;
+
+        Run? currentRun = null;
+        for (int i = 0; i < runs.Count; i++)
+        {
+            var run = runs[i];
+            
+            // 只有当 Run 仅包含 Text 和 RunProperties 时才参与合并，避免损坏 Break、Drawing 等特殊元素
+            bool isSimpleRun = run.Elements().All(e => e is RunProperties || e is Text);
+            if (!isSimpleRun)
+            {
+                currentRun = null; // 断开，不合并特殊 Run
+                continue;
+            }
+
+            if (currentRun == null)
+            {
+                currentRun = run;
+                continue;
+            }
+
+            // 对比两个 Run 的属性是否完全一致
+            if (AreRunPropertiesEquivalent(currentRun.RunProperties, run.RunProperties))
+            {
+                var currentText = currentRun.Elements<Text>().FirstOrDefault();
+                var nextText = run.Elements<Text>().FirstOrDefault();
+
+                if (currentText != null && nextText != null)
+                {
+                    currentText.Text += nextText.Text;
+                    
+                    // 保留空格处理属性
+                    if (nextText.Space != null && nextText.Space.Value == SpaceProcessingModeValues.Preserve)
+                    {
+                        currentText.Space = SpaceProcessingModeValues.Preserve;
+                    }
+                    
+                    run.Remove();
+                }
+                else if (currentText == null && nextText != null)
+                {
+                    // 如果前一个 Run 没有 Text 元素，把后一个的 Text 移动过来
+                    currentRun.AppendChild(nextText.CloneNode(true));
+                    run.Remove();
+                }
+                else if (nextText == null)
+                {
+                    // 后一个没有 Text，直接移除
+                    run.Remove();
+                }
+            }
+            else
+            {
+                currentRun = run;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 比较两个 Run 属性是否等价
+    /// </summary>
+    private static bool AreRunPropertiesEquivalent(RunProperties? rPr1, RunProperties? rPr2)
+    {
+        if (rPr1 == null && rPr2 == null) return true;
+        
+        // 如果其中一个是 null，另一个是非空但没有实际子元素（如 <w:rPr/>），也视为等价
+        bool isEmpty1 = rPr1 == null || !rPr1.HasChildren;
+        bool isEmpty2 = rPr2 == null || !rPr2.HasChildren;
+        
+        if (isEmpty1 && isEmpty2) return true;
+        if (isEmpty1 || isEmpty2) return false;
+
+        // 终极对比：使用 OuterXml 来比对 XML 内容是否完全相同
+        return rPr1!.OuterXml == rPr2!.OuterXml;
     }
 }
 

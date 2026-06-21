@@ -294,6 +294,9 @@ public partial class NewSchemePanel : Page
                 var tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".docx");
                 File.Copy(dialog.FileName, tempPath, true);
 
+                // 在这里执行一次 Normalize 规范化，以便提取变量和高保真预览时不受碎 Run 干扰
+                WordParser.NormalizeDocumentRuns(tempPath);
+
                 _currentTemplatePath = tempPath;
                 TxtTemplatePath.Text = dialog.FileName; // 显示原文件名
                 LoadPreview();

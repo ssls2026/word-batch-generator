@@ -137,7 +137,7 @@ public class ExcelHandler
     public static void GenerateExcelTemplate(List<string> variables, string filePath)
     {
         using var package = new ExcelPackage();
-        var worksheet = package.Workbook.Worksheets.Add("批量授权数据录入");
+        var worksheet = package.Workbook.Worksheets.Add("批量数据录入");
 
         // 样式配置：Office 经典蓝主题
         var headerFont = new Font("微软雅黑", 11, FontStyle.Bold);

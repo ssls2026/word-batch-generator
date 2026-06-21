@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,10 +23,12 @@ public partial class GeneratePanel : Page
     private bool _isInitializing = false;
     private List<string> _generatedFullPaths = new();
     private List<MergedFileItem> _mergedFiles = new();
+    private ObservableCollection<LogItemViewModel> _logItems = new();
 
     public GeneratePanel()
     {
         InitializeComponent();
+        LstLogs.ItemsSource = _logItems;
         LoadLastScheme();
     }
 
@@ -35,6 +38,7 @@ public partial class GeneratePanel : Page
     public GeneratePanel(string schemeName)
     {
         InitializeComponent();
+        LstLogs.ItemsSource = _logItems;
         LoadScheme(schemeName);
     }
 
@@ -405,9 +409,11 @@ public partial class GeneratePanel : Page
             return;
         }
 
-        // 显示进度 UI
+        // 显示进度与日志 UI
         PanelProgress.Visibility = Visibility.Visible;
+        PanelLogs.Visibility = Visibility.Visible;
         PanelResults.Visibility = Visibility.Collapsed;
+        _logItems.Clear();
         _mergedFiles.Clear();
         MergedResultsItemsControl.ItemsSource = null;
         MergedResultsItemsControl.Visibility = Visibility.Collapsed;
@@ -440,6 +446,15 @@ public partial class GeneratePanel : Page
                         {
                             ProgressBar.Value = (double)current / total * 100;
                             TxtProgress.Text = $"正在生成: {current}/{total}";
+                        });
+                    },
+                    (logMsg) =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            var item = new LogItemViewModel(logMsg);
+                            _logItems.Add(item);
+                            LstLogs.ScrollIntoView(item);
                         });
                     }
                 );
@@ -1314,6 +1329,67 @@ public partial class GeneratePanel : Page
             }
         }
     }
+
+    /// <summary>
+    /// 清除执行日志
+    /// </summary>
+    private void BtnClearLogs_Click(object sender, RoutedEventArgs e)
+    {
+        _logItems.Clear();
+    }
+}
+
+/// <summary>
+/// 执行日志项 UI 绑定视图模型
+/// </summary>
+public class LogItemViewModel
+{
+    private readonly LogMessage _log;
+
+    public LogItemViewModel(LogMessage log)
+    {
+        _log = log;
+    }
+
+    public string TimeString => _log.Time.ToString("HH:mm:ss.fff");
+
+    public string LevelString => _log.Level switch
+    {
+        LogLevel.Info => "INFO",
+        LogLevel.Success => "PASS",
+        LogLevel.Warning => "WARN",
+        LogLevel.Error => "FAIL",
+        _ => "INFO"
+    };
+
+    public Brush LevelBgBrush => _log.Level switch
+    {
+        LogLevel.Info => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E2E8F0")),
+        LogLevel.Success => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DCFCE7")),
+        LogLevel.Warning => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEF3C7")),
+        LogLevel.Error => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEE2E2")),
+        _ => Brushes.LightGray
+    };
+
+    public Brush LevelFgBrush => _log.Level switch
+    {
+        LogLevel.Info => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569")),
+        LogLevel.Success => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#15803D")),
+        LogLevel.Warning => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B45309")),
+        LogLevel.Error => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#B91C1C")),
+        _ => Brushes.DarkGray
+    };
+
+    public string Message => _log.Message;
+
+    public Brush MessageBrush => _log.Level switch
+    {
+        LogLevel.Info => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#334155")),
+        LogLevel.Success => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F172A")),
+        LogLevel.Warning => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#78350F")),
+        LogLevel.Error => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7F1D1D")),
+        _ => Brushes.Black
+    };
 }
 
 /// <summary>

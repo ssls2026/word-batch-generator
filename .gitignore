@@ -8,13 +8,23 @@
 *.suo
 *.userosscache
 *.sln.docstates
+*.suo.user
+
+# Rider/VSCode workspace files
+.idea/
+.vscode/
 
 # System & OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Publish output (single-file exe)
 dist/
 
 # Installer compiled output
 installer/output/
+
+# WebView2 and Sogou/MMKV local caches
+WebView2_Cache/
+*.log

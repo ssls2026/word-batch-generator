@@ -1,0 +1,44 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore WordBatchGenerator/WordBatchGenerator.csproj
+
+    - name: Publish Single File EXE
+      run: |
+        dotnet publish -c Release WordBatchGenerator/WordBatchGenerator.csproj
+      # Output will be generated in dist/ due to <PublishDir> in csproj config
+
+    - name: Build Installer (Inno Setup)
+      uses: jetli/compile-inno-setup-action@v1
+      with:
+        filepath: 'installer/setup.iss'
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/Word批量生成器.exe
+          installer/output/Word批量生成器_*_Setup.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

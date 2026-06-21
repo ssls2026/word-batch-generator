@@ -6,6 +6,27 @@ using System.Text;
 namespace WordBatchGenerator.Core;
 
 /// <summary>
+/// 日志级别
+/// </summary>
+public enum LogLevel
+{
+    Info,
+    Success,
+    Warning,
+    Error
+}
+
+/// <summary>
+/// 日志消息模型
+/// </summary>
+public class LogMessage
+{
+    public DateTime Time { get; set; } = DateTime.Now;
+    public LogLevel Level { get; set; } = LogLevel.Info;
+    public string Message { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// Word 文档批量生成器
 /// </summary>
 public class Generator
@@ -16,8 +37,10 @@ public class Generator
     /// <param name="templatePath">模板文件路径</param>
     /// <param name="dataList">数据列表（每行为一个字典）</param>
     /// <param name="outputDir">输出目录</param>
-    /// <param name="fileNameTemplate">文件名模板（例如：授权书-{{公司名称}}.docx）</param>
+    /// <param name="fileNameTemplate">文件名模板（例如：合同-{{客户名称}}.docx）</param>
+    /// <param name="subfolderVar">子文件夹变量规则</param>
     /// <param name="progress">进度回调</param>
+    /// <param name="onLog">日志回调</param>
     /// <returns>生成的文件数量</returns>
     public static int GenerateBatch(
         string templatePath,
@@ -25,10 +48,16 @@ public class Generator
         string outputDir,
         string fileNameTemplate,
         string subfolderVar = "",
-        Action<int, int>? progress = null)
+        Action<int, int>? progress = null,
+        Action<LogMessage>? onLog = null)
     {
+        onLog?.Invoke(new LogMessage { Level = LogLevel.Info, Message = $"开始批量生成，共 {dataList.Count} 条数据。" });
+
         if (!File.Exists(templatePath))
+        {
+            onLog?.Invoke(new LogMessage { Level = LogLevel.Error, Message = $"模板文件不存在: {templatePath}" });
             throw new FileNotFoundException("模板文件不存在", templatePath);
+        }
 
         int successCount = 0;
 
@@ -56,21 +85,32 @@ public class Generator
                 }
 
                 if (!Directory.Exists(targetOutputDir))
+                {
                     Directory.CreateDirectory(targetOutputDir);
+                    onLog?.Invoke(new LogMessage { Level = LogLevel.Info, Message = $"创建输出子目录: {targetOutputDir}" });
+                }
 
-                var outputPath = Path.Combine(targetOutputDir, SanitizeFileName(fileName));
+                var sanitizedFileName = SanitizeFileName(fileName);
+                var outputPath = Path.Combine(targetOutputDir, sanitizedFileName);
+
+                onLog?.Invoke(new LogMessage { Level = LogLevel.Info, Message = $"[{i + 1}/{dataList.Count}] 正在处理，生成文件名: {sanitizedFileName}" });
 
                 GenerateSingle(templatePath, data, outputPath);
                 successCount++;
+
+                onLog?.Invoke(new LogMessage { Level = LogLevel.Success, Message = $"[{i + 1}/{dataList.Count}] 生成成功: {sanitizedFileName}" });
 
                 progress?.Invoke(i + 1, dataList.Count);
             }
             catch (Exception ex)
             {
+                onLog?.Invoke(new LogMessage { Level = LogLevel.Error, Message = $"[{i + 1}/{dataList.Count}] 生成失败: {ex.Message}" });
                 // 记录错误但继续处理下一个
                 Console.WriteLine($"生成第 {i + 1} 个文件失败: {ex.Message}");
             }
         }
+
+        onLog?.Invoke(new LogMessage { Level = LogLevel.Info, Message = $"批量生成结束。成功: {successCount}，失败: {dataList.Count - successCount}。" });
 
         return successCount;
     }
@@ -83,6 +123,9 @@ public class Generator
         // 复制模板文件
         File.Copy(templatePath, outputPath, true);
 
+        // 在进行替换前，运行 RunNormalizer 修复碎 Run 占位符问题
+        WordParser.NormalizeDocumentRuns(outputPath);
+
         // 打开并替换变量
         using var doc = WordprocessingDocument.Open(outputPath, true);
         var body = doc.MainDocumentPart?.Document.Body;
@@ -94,6 +137,32 @@ public class Generator
             if (element is Text textElement)
             {
                 textElement.Text = ReplaceVariables(textElement.Text, data);
+            }
+        }
+
+        // 替换页眉和页脚中的变量
+        var mainPart = doc.MainDocumentPart;
+        if (mainPart != null)
+        {
+            foreach (var headerPart in mainPart.HeaderParts)
+            {
+                if (headerPart.Header != null)
+                {
+                    foreach (var textElement in headerPart.Header.Descendants<Text>())
+                    {
+                        textElement.Text = ReplaceVariables(textElement.Text, data);
+                    }
+                }
+            }
+            foreach (var footerPart in mainPart.FooterParts)
+            {
+                if (footerPart.Footer != null)
+                {
+                    foreach (var textElement in footerPart.Footer.Descendants<Text>())
+                    {
+                        textElement.Text = ReplaceVariables(textElement.Text, data);
+                    }
+                }
             }
         }
 
