@@ -53,7 +53,8 @@ UninstallDisplayName={#AppName} v{#AppVersion}
 MinVersion=10.0
 
 [Languages]
-Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "chinesesimplified"; MessagesFile: "compiler:Default.isl,.\ChineseSimplified.isl"
+
 
 [Tasks]
 Name: "desktopicon";    Description: "创建桌面快捷方式(&D)"; GroupDescription: "附加任务:"
