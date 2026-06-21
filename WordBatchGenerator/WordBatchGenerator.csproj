@@ -22,6 +22,8 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <DebugType>embedded</DebugType>
+    <!-- 发布到根目录 dist，避免路径过深 -->
+    <PublishDir>..\dist\</PublishDir>
   </PropertyGroup>
 
   <ItemGroup>
