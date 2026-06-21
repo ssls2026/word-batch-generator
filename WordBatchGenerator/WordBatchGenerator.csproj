@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -11,6 +11,7 @@
     <Version>2.0.0</Version>
     <Authors>LZS</Authors>
     <Description>Word 批量变量替换与授权生成工具 - C# 重构版</Description>
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!-- 发布配置：单文件 + 自包含（WPF 不支持裁剪，已移除） -->
