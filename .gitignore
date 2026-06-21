@@ -1,6 +1,4 @@
-# Build folders
-bin/
-obj/
+# Build output
 [Bb]in/
 [Oo]bj/
 
@@ -11,10 +9,9 @@ obj/
 *.userosscache
 *.sln.docstates
 
-# System & OS Files
+# System & OS files
 .DS_Store
 Thumbs.db
 
-# Compiled single files
-Word批量生成器.exe
-Word批量生成器_带图标.exe
+# Publish output (single-file exe)
+dist/
