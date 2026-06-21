@@ -18,18 +18,100 @@ public partial class MainWindow : Window
         BtnNewScheme.Tag = new NewSchemePanel();
         BtnSchemeList.Tag = new SchemeListPanel();
 
-        var lastScheme = SchemeManager.GetLastScheme();
-        if (!string.IsNullOrEmpty(lastScheme))
+        // 加载历史应用状态与位置
+        var state = SchemeManager.GetAppStateData();
+
+        // 1. 恢复窗口位置和大小
+        if (state.WindowWidth.HasValue && state.WindowHeight.HasValue)
         {
-            BtnGenerate.Tag = new GeneratePanel(lastScheme);
+            // 限制不能小于设计的 MinWidth/MinHeight 且不能大于屏幕可用范围
+            double screenWidth = SystemParameters.WorkArea.Width;
+            double screenHeight = SystemParameters.WorkArea.Height;
+
+            double width = Math.Max(MinWidth, Math.Min(state.WindowWidth.Value, screenWidth));
+            double height = Math.Max(MinHeight, Math.Min(state.WindowHeight.Value, screenHeight));
+            Width = width;
+            Height = height;
+
+            if (state.WindowLeft.HasValue && state.WindowTop.HasValue)
+            {
+                double left = Math.Max(0, Math.Min(state.WindowLeft.Value, screenWidth - width));
+                double top = Math.Max(0, Math.Min(state.WindowTop.Value, screenHeight - height));
+                Left = left;
+                Top = top;
+            }
+        }
+
+        if (state.IsMaximized)
+        {
+            WindowState = WindowState.Maximized;
+        }
+
+        // 2. 加载和导航到上次的页面
+        var lastScheme = state.LastScheme;
+        var lastPage = state.LastPage;
+
+        BtnGenerate.Tag = !string.IsNullOrEmpty(lastScheme) ? new GeneratePanel(lastScheme) : new GeneratePanel();
+
+        // 根据历史打开页面进行回显导航
+        if (lastPage == "Generate")
+        {
             BtnGenerate.IsChecked = true;
             ContentFrame.Navigate((Page)BtnGenerate.Tag);
         }
+        else if (lastPage == "SchemeList")
+        {
+            BtnSchemeList.IsChecked = true;
+            ContentFrame.Navigate((Page)BtnSchemeList.Tag);
+        }
         else
         {
-            BtnGenerate.Tag = new GeneratePanel();
             BtnNewScheme.IsChecked = true;
             ContentFrame.Navigate((Page)BtnNewScheme.Tag);
+        }
+
+        // 监听关闭事件以保存位置与状态
+        this.Closing += MainWindow_Closing;
+    }
+
+    private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        try
+        {
+            var state = SchemeManager.GetAppStateData();
+
+            // 记住当前活动的导航页面
+            if (BtnGenerate.IsChecked == true)
+                state.LastPage = "Generate";
+            else if (BtnSchemeList.IsChecked == true)
+                state.LastPage = "SchemeList";
+            else
+                state.LastPage = "NewScheme";
+
+            // 记住窗口尺寸、位置与最大化状态
+            if (WindowState == WindowState.Normal)
+            {
+                state.WindowLeft = Left;
+                state.WindowTop = Top;
+                state.WindowWidth = Width;
+                state.WindowHeight = Height;
+                state.IsMaximized = false;
+            }
+            else if (WindowState == WindowState.Maximized)
+            {
+                state.IsMaximized = true;
+                // 最大化时，记录 RestoreBounds 的位置和大小，使下次还原为正常尺寸时符合预期
+                state.WindowLeft = RestoreBounds.Left;
+                state.WindowTop = RestoreBounds.Top;
+                state.WindowWidth = RestoreBounds.Width;
+                state.WindowHeight = RestoreBounds.Height;
+            }
+
+            SchemeManager.SaveAppStateData(state);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"关闭应用保存状态失败: {ex.Message}");
         }
     }
 

@@ -179,36 +179,112 @@ public class SchemeManager
         System.IO.Compression.ZipFile.ExtractToDirectory(wspFilePath, targetDir);
     }
 
-    /// <summary>
-    /// 保存最后使用的方案名称
-    /// </summary>
-    public static void SaveLastScheme(string schemeName)
+    public class AppState
     {
-        var statePath = Path.Combine(SchemesBaseDir, "last_state.json");
-        var state = new { last_scheme = schemeName };
-        var json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(statePath, json);
+        public string LastScheme { get; set; } = string.Empty;
+        public string LastPage { get; set; } = string.Empty;
+        public double? WindowLeft { get; set; }
+        public double? WindowTop { get; set; }
+        public double? WindowWidth { get; set; }
+        public double? WindowHeight { get; set; }
+        public bool IsMaximized { get; set; } = false;
     }
 
     /// <summary>
-    /// 获取最后使用的方案名称
+    /// 获取完整的应用程序状态数据
     /// </summary>
-    public static string? GetLastScheme()
+    public static AppState GetAppStateData()
     {
         var statePath = Path.Combine(SchemesBaseDir, "last_state.json");
         if (!File.Exists(statePath))
-            return null;
+            return new AppState();
 
         try
         {
             var json = File.ReadAllText(statePath);
-            var state = JsonSerializer.Deserialize<JsonElement>(json);
-            return state.GetProperty("last_scheme").GetString();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            var state = new AppState();
+
+            if (root.TryGetProperty("last_scheme", out var pScheme))
+                state.LastScheme = pScheme.GetString() ?? string.Empty;
+
+            if (root.TryGetProperty("last_page", out var pPage))
+                state.LastPage = pPage.GetString() ?? string.Empty;
+
+            if (root.TryGetProperty("window_left", out var pLeft) && pLeft.ValueKind == JsonValueKind.Number)
+                state.WindowLeft = pLeft.GetDouble();
+
+            if (root.TryGetProperty("window_top", out var pTop) && pTop.ValueKind == JsonValueKind.Number)
+                state.WindowTop = pTop.GetDouble();
+
+            if (root.TryGetProperty("window_width", out var pWidth) && pWidth.ValueKind == JsonValueKind.Number)
+                state.WindowWidth = pWidth.GetDouble();
+
+            if (root.TryGetProperty("window_height", out var pHeight) && pHeight.ValueKind == JsonValueKind.Number)
+                state.WindowHeight = pHeight.GetDouble();
+
+            if (root.TryGetProperty("window_maximized", out var pMax))
+                state.IsMaximized = pMax.GetBoolean();
+
+            return state;
         }
         catch
         {
-            return null;
+            return new AppState();
         }
+    }
+
+    /// <summary>
+    /// 保存完整的应用程序状态数据
+    /// </summary>
+    public static void SaveAppStateData(AppState state)
+    {
+        try
+        {
+            var statePath = Path.Combine(SchemesBaseDir, "last_state.json");
+            var dto = new
+            {
+                last_scheme = state.LastScheme,
+                last_page = state.LastPage,
+                window_left = state.WindowLeft,
+                window_top = state.WindowTop,
+                window_width = state.WindowWidth,
+                window_height = state.WindowHeight,
+                window_maximized = state.IsMaximized
+            };
+            var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(statePath, json);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"保存应用状态数据失败: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 保存最后使用的方案名称 (保留兼容性)
+    /// </summary>
+    public static void SaveLastScheme(string schemeName)
+    {
+        try
+        {
+            var state = GetAppStateData();
+            state.LastScheme = schemeName;
+            SaveAppStateData(state);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"保存最后使用的方案失败: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 获取最后使用的方案名称 (保留兼容性)
+    /// </summary>
+    public static string? GetLastScheme()
+    {
+        return GetAppStateData().LastScheme;
     }
 }
 
