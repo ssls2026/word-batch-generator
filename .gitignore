@@ -28,3 +28,7 @@ installer/output/
 # WebView2 and Sogou/MMKV local caches
 WebView2_Cache/
 *.log
+
+# Private documentation (ignored from git)
+开发与发布维护指南.md
+
